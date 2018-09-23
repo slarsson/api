@@ -1,17 +1,15 @@
 'use strict';
 
-class Index {
-    constructor(){
+const Lib = require('../lib.js');
 
+class Index extends Lib {
+    constructor(req, res){
+        super(req, res);
+        this.res = res;
     }
 
-    _index(){
-        console.log("index");
-        return {};
-    }
-
-    info(){
-        return {};
+    index(){
+        this.render({name: "test api"});
     }
 }
 

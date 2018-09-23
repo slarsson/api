@@ -1,18 +1,15 @@
 'use strict';
 
-class User {
-    constructor(method){
-        console.log(method);
+const Lib = require('../lib.js');
+
+class User extends Lib {
+    constructor(req, res){
+        super(req, res);
+        this.res = res;
     }
 
-    _index(){
-        console.log("user/index");
-        return {};
-    }
-
-    info(){
-        console.log("info finns!!!");
-        return {"vafan": "helvete"};
+    index(){
+        this.render({location: "/user"});
     }
 };
 

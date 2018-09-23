@@ -16,7 +16,7 @@ const redirect = (res, url) => {
 const render = (res, json, modify) => {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Origin','*');
-    res.setHeader('Access-Control-Allow-Headers','Origin, Content-type, Accept, auth');
+    res.setHeader('Access-Control-Allow-Headers','Origin, Content-type, Accept');
     res.setHeader('Access-Control-Allow-Methods','GET, POST, PATCH, PUT, DELETE, HEAD, OPTIONS');
     res.end(JSON.stringify(json, null, 0));    
 };

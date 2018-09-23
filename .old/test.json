@@ -16,7 +16,7 @@
         {"name":"", "points": 0, "stats": null}
     ],
     "bracket": [
-        {"t1": null, "t2": null, "results": null, "status":null},
+        {"t1": "test", "t2": null, "results": null, "status":null},
         {"t1": null, "t2": null, "results": null, "status":null},
         {"t1": null, "t2": null, "results": null, "status":null},
         {"t1": null, "t2": null, "results": null, "status":null},
