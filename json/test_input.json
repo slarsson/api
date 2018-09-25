@@ -1,5 +1,14 @@
 {
     "name": null,
     "city": null,
-    "street": null
+    "street": null,
+    "obj1": {
+        "data1": null, "data2": null, "asdf": null
+    },
+    "array": ["index 0", "index 1", "index 2", "index 3"],
+    "array2": [
+        {"data1": "d1", "data2": null, "asdf": null},
+        {"data1": "d2", "data2": null, "asdf": null},
+        {"dataasdfasdf": "d3", "data2": null, "asdf": null}  
+    ]
 }

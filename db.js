@@ -5,14 +5,16 @@ const mongodb = require('mongodb');
 const url = 'mongodb://localhost:27017/';
 const options = {useNewUrlParser:true};
 const name = 'vod';
-const table = 'test_collection';
+//const table = 'test_collection';
+
+//OBS OSB: input json måste fixas, nummer, null, true, false osv osv..
 
 class Database {
     constructor(){}
 
     find(collection, query, cb){
         //test
-        query = {'_id': new mongodb.ObjectID(query.id)};
+        //query = {'_id': new mongodb.ObjectID(query.id)};
         //
 
         mongodb.connect(url, options, (err, db) => {

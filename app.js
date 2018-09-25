@@ -30,7 +30,7 @@ const server = http.createServer((req, res) => {
             obj.index(); 
         }
     }catch(e){
-        //console.log(e);
+        console.log(e);
         error(res, {status: false});
         return;
     }

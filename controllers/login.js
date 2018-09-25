@@ -13,13 +13,32 @@ class Login extends Lib {
     }
 
     index(){
-        if(this.method == 'GET'){this.status(); return;}
-        if(this.method == 'POST'){this.check(); return;}
-        if(this.method == 'PATCH'){this.update(); return;}
+        if(this.method == 'GET'){this.get(); return;}
+        if(this.method == 'POST'){this.add(); return;}
         this.render({status: "method not found"});
     }
 
-    _status(){
+    get(){
+        this.db.find_all('test_collection', this.query, (res) => {
+            this.render(res);
+        });
+    }
+
+    add(){
+        this.post((query) => {
+            this.get_template('test_input', (template) => {
+                let data = this.merge(query, template);
+                this.render(data);
+                this.db.insert('test_collection', data, () => {});
+            });
+        });
+    }
+
+
+
+
+    
+    /*_status(){
         this.render({"value": "nothing to see here.."});
     }
 
@@ -36,10 +55,11 @@ class Login extends Lib {
     }
 
     status(){
-        //this.query = {"id": "5ba7d27bee1294648c9252f9"};
-        this.find('test_collection', this.query, (res) => {
-            this.render(res);
-        });  
+        this.render(this.query);
+
+        //this.find('test_collection', {}, (res) => {
+        //    this.render(res);
+        //});  
     }
 
     update(){
@@ -66,6 +86,12 @@ class Login extends Lib {
             this.render(res);
         });
     }
+
+    _test_add(){
+        this.get_template("test_input", (file) => {
+            this.render(this.merge(this.query, file));
+        });
+    }*/
 }
 
 module.exports = Login;
