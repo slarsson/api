@@ -11,11 +11,6 @@ class Library {
         this.res = res;
     }
 
-    format(json){
-        //format json
-        return json;
-    }
-
     post(cb){
         let body = '';
         this.req.on('data', (chunk) => {
@@ -42,7 +37,8 @@ class Library {
             }
 
             if(!(target[index] === undefined || (target[index] !== null && typeof target[index] == 'object') || typeof query[key] == 'object')){
-                target[index] = this.sanitize(query[key]);
+                target[index] = query[key];
+                //target[index] = this.sanitize(query[key]);
             }
         }
         return template;
@@ -62,6 +58,22 @@ class Library {
     sanitize(text){
         text = require('sanitize-html')(text, {allowedTags: [], allowedAttributes: []});
         return text.trim();
+    }
+
+    format(json){
+        for(let key in json){
+            json[key] = this.sanitize(json[key]);
+            if(json[key] == 'true'){json[key] = true; continue;}
+            if(json[key] == 'false'){json[key] = false; continue;}
+            if(json[key] == 'null'){json[key] = null; continue;}
+            
+            //stora nummer!?
+            try{
+                let n = Number(json[key]);
+                if(!Number.isNaN(n)){json[key] = n;}
+            }catch(e){console.log(e);}
+        }
+        return json;
     }
 
     render(json){

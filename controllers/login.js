@@ -5,11 +5,8 @@ const Lib = require('../lib.js');
 class Login extends Lib {
     constructor(req, res, query){
         super(req, res);
-        this.query = query;
+        this.query = this.format(query);
         this.method = req.method;
-        
-        this.req = req;
-        this.res = res;
     }
 
     index(){
@@ -27,13 +24,22 @@ class Login extends Lib {
     add(){
         this.post((query) => {
             this.get_template('test_input', (template) => {
-                let data = this.merge(query, template);
+                let data = this.merge(this.format(query), template);
                 this.render(data);
                 this.db.insert('test_collection', data, () => {});
             });
         });
     }
 
+    _test(){
+        let x = {};
+
+            this.db.edit('test_collection', {name: "LULEÅ"}, this.query, (res) => {
+
+            });
+        
+        this.render(x);
+    }
 
 
 

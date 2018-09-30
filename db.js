@@ -24,6 +24,7 @@ class Database {
             dbo.collection(collection).findOne(query, (err, res) => {
                 if(err){throw err;}
                 db.close();
+                delete res._id;
                 cb(res);
             });
         });
