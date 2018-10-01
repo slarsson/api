@@ -16,7 +16,19 @@ class Login extends Lib {
     }
 
     get(){
-        this.db.find_all('test_collection', this.query, (res) => {
+        if(this.query.id === undefined){
+            this.render({error: "no target"});
+            return;
+        }else {
+            this.db.find('test_collection', {id: this.query.id}, (res) => {
+                if(res == null){this.render({error: "id not found"}); return;}
+                this.render(res);
+            });
+        }
+    }
+
+    _browse(){
+        this.db.find_all('test_collection', {}, (res) => {
             this.render(res);
         });
     }
@@ -24,9 +36,12 @@ class Login extends Lib {
     add(){
         this.post((query) => {
             this.get_template('test_input', (template) => {
-                let data = this.merge(this.format(query), template);
-                this.render(data);
-                this.db.insert('test_collection', data, () => {});
+                let data = this.merge(query, template);
+                //this.render(data);
+                this.db.insert('test_collection', data, (res, id) => {
+                    res.input = id;
+                    this.render(res);
+                });
             });
         });
     }
@@ -34,70 +49,26 @@ class Login extends Lib {
     _test(){
         let x = {};
 
-            this.db.edit('test_collection', {name: "LULEÅ"}, this.query, (res) => {
-
-            });
-        
-        this.render(x);
-    }
-
-
-
-    
-    /*_status(){
-        this.render({"value": "nothing to see here.."});
-    }
-
-    check(){
-        if(!this.authorized(true)){return;}
-
-        this.post((x) => {
-            console.log(x);
-            //let query = {id: "T6GDTXQEyr"};
-            this.find('test_collection', x, (res) => {
+            this.db.edit('test_collection', {id: this.query.id}, this.query, (res) => {
+                
                 this.render(res);
             });
-        });   
+        
     }
 
-    status(){
-        this.render(this.query);
-
-        //this.find('test_collection', {}, (res) => {
-        //    this.render(res);
-        //});  
-    }
-
-    update(){
-        this.edit('test_collection', {id: "294npkp5SJ"}, this.query, (res) => {
+    _test2(){
+        this.db.unset('test_collection', {name: "LULEÅ"}, this.query, (res) => {      
             this.render(res);
         });
     }
 
-    _remove(){
-        this.query = {"id": "xeRz4KFjed"};
-        this.remove('test_collection', this.query, (res) => {
+    _test3(){
+        this.db.remove('test_collection', this.query, (res) => {
             this.render(res);
         });
     }
 
-    _add(){
-        let template = require('../json/test_input.json');
-        template.name = this.query.name;
-        template.city = this.query.city;
-        template.street = this.query.street;
 
-
-        this.insert('test_collection', template, (res) => {
-            this.render(res);
-        });
-    }
-
-    _test_add(){
-        this.get_template("test_input", (file) => {
-            this.render(this.merge(this.query, file));
-        });
-    }*/
 }
 
 module.exports = Login;
