@@ -5,8 +5,10 @@ const Lib = require('../lib.js');
 class Login extends Lib {
     constructor(req, res, query){
         super(req, res);
-        this.query = this.format(query);
+        this.req = req;
         this.method = req.method;
+        this.query = this.format(query);
+        this.id = this.extract_value('id', this.query);
     }
 
     index(){
@@ -16,11 +18,11 @@ class Login extends Lib {
     }
 
     get(){
-        if(this.query.id === undefined){
+        if(this.id == null){
             this.render({error: "no target"});
             return;
         }else {
-            this.db.find('test_collection', {id: this.query.id}, (res) => {
+            this.db.find('test_collection', {id: this.id}, (res) => {
                 if(res == null){this.render({error: "id not found"}); return;}
                 this.render(res);
             });
@@ -34,11 +36,9 @@ class Login extends Lib {
     }
 
     add(){
-        this.post((query) => {
+        this.post((data) => {
             this.get_template('test_input', (template) => {
-                let data = this.merge(query, template);
-                //this.render(data);
-                this.db.insert('test_collection', data, (res, id) => {
+                this.db.insert_with_unique_id('test_collection', this.merge(this.format(data), template), (res, id) => {
                     res.input = id;
                     this.render(res);
                 });
@@ -68,7 +68,31 @@ class Login extends Lib {
         });
     }
 
+    async _test4(){
+        if(!await this.authorize(this.query.test)){return;}
+        this.render(null);
+    }
 
+    _add_user(){
+        this.get_template('user', (template) => {
+            let input = this.merge(this.query, template);
+            input.date = new Date().getTime();
+            input.ip = this.req.connection.remoteAddress;
+            input.useragent = this.req.headers['user-agent'];
+
+            this.db.insert('sessions', input, (res) => {
+                console.log(input);
+                this.render(res);
+            });
+        });
+    }
+
+    _show_users(){
+        console.log(this.req.headers['user-agent']);
+        this.db.find_all('sessions', {}, (res) => {
+            this.render(res);
+        });
+    }
 }
 
 module.exports = Login;

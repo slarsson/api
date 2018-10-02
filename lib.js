@@ -38,7 +38,6 @@ class Library {
 
             if(!(target[index] === undefined || (target[index] !== null && typeof target[index] == 'object') || typeof query[key] == 'object')){
                 target[index] = query[key];
-                //target[index] = this.sanitize(query[key]);
             }
         }
         return template;
@@ -76,11 +75,38 @@ class Library {
         return json;
     }
 
-    render(json){
+    // only values, NOT nested objects
+    // returns NULL if key do not exist
+    extract_value(what, object){
+        if(object[what] !== undefined && object[what] !== 'object'){
+            let x = object[what];
+            delete object[what];
+            return x;
+        }
+        return null;
+    }
+
+    // ex:
+    authorize(key){
+        return new Promise(resolve => {
+            if(key == null){key = "null";}
+            this.db.find('sessions', {id: key}, (res) => {
+                if(res == null){
+                    this.render({status: false, error: "not authorized"}, 401); 
+                    return resolve(false);
+                }
+                return resolve(true);
+            });
+        });
+    }
+
+    render(json, http_status_code){
+        if(http_status_code === undefined){http_status_code = 200;}
         this.res.setHeader('Content-Type', 'application/json');
         this.res.setHeader('Access-Control-Allow-Origin','*');
         this.res.setHeader('Access-Control-Allow-Headers','Origin, Content-type, Accept');
         this.res.setHeader('Access-Control-Allow-Methods','GET, POST, PATCH, PUT, DELETE, HEAD, OPTIONS');
+        this.res.writeHead(http_status_code);
         this.res.end(JSON.stringify(json, null, 0));    
     }  
 }

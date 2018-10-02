@@ -80,6 +80,17 @@ class Database {
     insert(collection, query, cb){
         mongodb.connect(url, options, (err, db) => {
             if(this.error(err)){cb(null); return;}
+            db.db(name).collection(collection).insertOne(query, (err, res) => {
+                db.close();
+                if(this.error(err)){cb(null); return;}
+                cb(this.parse_results(res.result));
+            });
+        });
+    }
+
+    insert_with_unique_id(collection, query, cb){
+        mongodb.connect(url, options, (err, db) => {
+            if(this.error(err)){cb(null); return;}
             
             let dbo = db.db(name);
             let id = this.random_id();
