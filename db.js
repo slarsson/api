@@ -35,17 +35,6 @@ class Database {
         }
     }
 
-    random_id(){
-        let id = "";
-        let data = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        let n = Math.floor(Math.random() * 5) + 10;
-
-        for(let i = 0; i < n; i++){
-            id += data.charAt(Math.floor(Math.random() * data.length));
-        } 
-        return id;
-    }
-
     remove_keys(keys, target){
         for(let key of keys){
             if(target[key] !== undefined){
@@ -88,14 +77,14 @@ class Database {
         });
     }
 
-    insert_with_unique_id(collection, query, cb){
+    insert_with_unique_id(collection, query, random, key, cb){
         mongodb.connect(url, options, (err, db) => {
             if(this.error(err)){cb(null); return;}
             
             let dbo = db.db(name);
-            let id = this.random_id();
+            let id = random();
 
-            dbo.collection(collection).findOne({id: id}, (err, res) => {
+            dbo.collection(collection).findOne({[key]: id}, (err, res) => {
                 if(this.error(err)){cb(null); return;}
                 if(res == null){
                     query.id = id;
@@ -106,7 +95,7 @@ class Database {
                     });
                 }else {
                     db.close();
-                    this.insert(collection, query, cb);
+                    this.insert_with_unique_id(collection, query, random, cb);
                 }
             });
         });
@@ -143,6 +132,20 @@ class Database {
                 db.close();
                 if(this.error(err)){cb({status: false, error: "bad query"}); return;}
                 cb(this.parse_results(res.result));
+            });
+        });
+    }
+
+    // returns promise, no callback!=?!=!!=!=
+    count(collection, query){
+        return new Promise(resolve => {
+            mongodb.connect(url, options, (err, db) => {
+                if(this.error(err)){resolve(null); return;}
+                db.db(name).collection(collection).countDocuments(query, (err, n) => {
+                    db.close();
+                    if(this.error(err)){resolve(null); return;}
+                    resolve(n);
+                });
             });
         });
     }

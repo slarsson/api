@@ -1,24 +1,76 @@
 'use strict';
 
-const Db = require('./db.js');
+const DB = require('./db.js');
 const qs = require('querystring');
 const fs = require('fs');
 
 class Library {
     constructor(req, res){
-        this.db = new Db();
+        this.db = new DB();
         this.req = req;
         this.res = res;
+        this.method = req.method;
     }
 
-    post(cb){
-        let body = '';
-        this.req.on('data', (chunk) => {
-            body += chunk;
-            if(body.length > 1e6){req.connection.destroy();}//1MB = max size
+
+    // TEST:
+    
+    // kolla att användare har access till dataN
+    authorize(key){
+        return new Promise((resolve) => {
+            if(key == null){key = "null";}
+            this.db.find('sessions', {id: key}, (res) => {
+                if(res == null){
+                    this.render({status: false, error: "not authorized"}, 401); 
+                    return resolve(false);
+                }
+                return resolve(true);
+            });
         });
-        this.req.on('end', () => {
-           cb(qs.parse(body));
+    }
+
+    // kolla att användaren är inloggad
+    authenticate(key){
+        return new Promise((resolve) => {
+            this.db.find('sessions', {id: key}, (res) => {
+                if(res == null){return resolve(false);}
+                if(res.ip == this.req.connection.remoteAddress && res.useragent == this.req.headers['user-agent']){
+                    let t = new Date().getTime();
+                    console.log(t);
+                    if(res.expire > t){
+                        return resolve(true);
+                    }
+                }
+                return resolve(false);
+            });
+        });
+    }
+
+    parse_cookie(){
+        console.log(this.req.headers['cookie']);
+    }
+
+    required_fields(obj){
+        let x = ["name", "city", "obj1.data"];
+    }
+
+
+
+
+
+
+    // OK:
+
+    post(){
+        return new Promise((resolve) => {
+            let body = '';
+            this.req.on('data', (chunk) => {
+                body += chunk;
+                if(body.length > 1e6){req.connection.destroy();}//1MB = max size
+            });
+            this.req.on('end', () => {
+                resolve(qs.parse(body));
+            });
         });
     }
 
@@ -43,14 +95,16 @@ class Library {
         return template;
     }
 
-    get_template(filename, cb){
-        fs.readFile("./json/"+filename+".json", (err, data) => {
-            let obj = {};
-            try{
-                if(err){throw err;} 
-                obj = JSON.parse(data);
-            }catch(e){console.log(e);}
-            cb(obj);
+    get_template(filename){
+        return new Promise((resolve) => {
+            fs.readFile("./json/"+filename+".json", (err, data) => {
+                let obj = {};
+                try{
+                    if(err){throw err;} 
+                    obj = JSON.parse(data);
+                }catch(e){console.log(e);}
+                resolve(obj);
+            });
         });
     }
 
@@ -86,18 +140,17 @@ class Library {
         return null;
     }
 
-    // ex:
-    authorize(key){
-        return new Promise(resolve => {
-            if(key == null){key = "null";}
-            this.db.find('sessions', {id: key}, (res) => {
-                if(res == null){
-                    this.render({status: false, error: "not authorized"}, 401); 
-                    return resolve(false);
-                }
-                return resolve(true);
-            });
-        });
+    // lenght: lenght of string, empty = fixed size between 5-15
+    random_id(length){
+        let id = "";
+        let data = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let n = Math.floor(Math.random() * 5) + 15;
+        if(Number.isInteger(length)){n = length;}
+
+        for(let i = 0; i < n; i++){
+            id += data.charAt(Math.floor(Math.random() * data.length));
+        } 
+        return id;
     }
 
     render(json, http_status_code){

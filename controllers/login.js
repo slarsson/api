@@ -1,12 +1,10 @@
 'use strict';
 
-const Lib = require('../lib.js');
+const LIBRARY = require('../lib.js');
 
-class Login extends Lib {
+class Login extends LIBRARY {
     constructor(req, res, query){
         super(req, res);
-        this.req = req;
-        this.method = req.method;
         this.query = this.format(query);
         this.id = this.extract_value('id', this.query);
     }
@@ -35,14 +33,11 @@ class Login extends Lib {
         });
     }
 
-    add(){
-        this.post((data) => {
-            this.get_template('test_input', (template) => {
-                this.db.insert_with_unique_id('test_collection', this.merge(this.format(data), template), (res, id) => {
-                    res.input = id;
-                    this.render(res);
-                });
-            });
+    async add(){
+        let data = await Promise.all([this.post(), this.get_template('test_input')]);
+        this.db.insert_with_unique_id('test_collection', this.merge(this.format(data[0]), data[1]), this.random_id, 'id', (res, id) => {
+            res.input = id;
+            this.render(res);
         });
     }
 
@@ -69,29 +64,45 @@ class Login extends Lib {
     }
 
     async _test4(){
-        if(!await this.authorize(this.query.test)){return;}
+        //if(!await this.authorize(this.query.test)){return;}
         this.render(null);
     }
 
-    _add_user(){
-        this.get_template('user', (template) => {
-            let input = this.merge(this.query, template);
-            input.date = new Date().getTime();
-            input.ip = this.req.connection.remoteAddress;
-            input.useragent = this.req.headers['user-agent'];
 
-            this.db.insert('sessions', input, (res) => {
-                console.log(input);
+    async _add_user(){
+        let template = await this.get_template('session');
+
+            template.id = this.random_id();
+            template.username = this.query.username;
+            template.ip = this.req.connection.remoteAddress;
+            template.update = new Date().getTime();
+            template.expire = new Date().getTime() + 1000000;
+            template.useragent = this.req.headers['user-agent'];
+
+            this.db.insert('sessions', template, (res) => {
+                console.log(template);
                 this.render(res);
             });
-        });
     }
 
-    _show_users(){
-        console.log(this.req.headers['user-agent']);
+    async _show_users(){
+        if(!await this.authenticate('3bilXF00tHetr8Tto9')){
+            this.render({error: "not allowed"}, 401);
+            return;
+        }
+
+        let x = await this.get_template('test_input');
+        this.required_fields(x);
+        
+        //this.parse_cookie();
         this.db.find_all('sessions', {}, (res) => {
             this.render(res);
         });
+    }
+
+    async _find_user(){
+        let x = await this.db.count('sessions', {username: this.query.username});
+        this.render(x);
     }
 }
 

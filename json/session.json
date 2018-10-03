@@ -1,7 +1,8 @@
 {
+    "id": null,
     "username": null,
-    "password": null,
-    "date": null,
+    "update": null,
+    "expire": null,
     "ip": null,
     "useragent": null
 }
