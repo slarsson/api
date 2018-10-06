@@ -3,6 +3,7 @@
 const DB = require('./db.js');
 const qs = require('querystring');
 const fs = require('fs');
+const crypto = require('crypto');
 
 class Library {
     constructor(req, res){
@@ -15,7 +16,7 @@ class Library {
 
     // TEST:
     
-    // kolla att användare har access till dataN
+    // kolla att användare har access till rätt data
     authorize(key){
         return new Promise((resolve) => {
             if(key == null){key = "null";}
@@ -30,25 +31,26 @@ class Library {
     }
 
     // kolla att användaren är inloggad
-    authenticate(key){
-        return new Promise((resolve) => {
-            this.db.find('sessions', {id: key}, (res) => {
-                if(res == null){return resolve(false);}
-                if(res.ip == this.req.connection.remoteAddress && res.useragent == this.req.headers['user-agent']){
-                    let t = new Date().getTime();
-                    console.log(t);
-                    if(res.expire > t){
-                        return resolve(true);
-                    }
-                }
-                return resolve(false);
-            });
+    authenticate(id){
+        return new Promise(async (resolve) => {
+            let session = await this.db.find('sessions', {id: id});
+            if(session == null){resolve(false); return;}
+            
+            let time  = new Date().getTime();
+            if(session.useragent != this.req.headers['user-agent'] || session.ip != this.req.connection.remoteAddress || session.expire < time){
+                console.log("error: ip/user-agent do not match session");
+                await this.db.remove('sessions', {id: id});
+                resolve(false); return;
+            }
+
+            let expire = new Date().getTime() + (3600*1000);
+            await this.db.edit('sessions', {id: id}, {update: time, expire: expire});
+            console.log(session);
+            resolve(true);
         });
     }
 
-    parse_cookie(){
-        console.log(this.req.headers['cookie']);
-    }
+    
 
     required_fields(obj){
         let x = ["name", "city", "obj1.data"];
@@ -151,6 +153,24 @@ class Library {
             id += data.charAt(Math.floor(Math.random() * data.length));
         } 
         return id;
+    }
+
+    parse_cookie(){
+        if(this.req.headers['cookie'] === undefined){return undefined;}
+        let item = this.req.headers['cookie'].split(';');
+        
+        let obj = {};
+        for(let row of item){
+            row = row.trim();
+            obj = Object.assign(obj, qs.parse(row));
+        }
+        return obj;
+    }
+
+    hash(string){
+        let hash =  crypto.createHash('sha256'); 
+        hash.update(string);
+        return hash.digest('hex');
     }
 
     render(json, http_status_code){

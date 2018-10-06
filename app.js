@@ -36,6 +36,7 @@ const server = http.createServer((req, res) => {
     }
 });
 
+// cors error!?
 const error = (res, json) => {
     res.writeHead(404, {"Content-Type": "application/json"});
     res.end(JSON.stringify(json, null, 0));    
