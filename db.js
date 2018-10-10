@@ -1,11 +1,10 @@
 'use strict';
 
-const mongodb = require('mongodb').MongoClient;//3.1.6
+const mongodb = require('mongodb');//3.1.6. .MongoClient;?
 const url = 'mongodb://localhost:27017/';
 const options = {useNewUrlParser:true};
 const name = 'vod';
 
-// FIXA: findAndModify
 class Database {
     find(collection, query){
         return new Promise((resolve) => {
@@ -62,7 +61,7 @@ class Database {
                         dbo.collection(collection).insertOne(query, (err, res) => {
                             db.close();
                             if(this.error(err)){resolve(null); return;}
-                            resolve(this.parse_results(res.result), {id: id});
+                            resolve([this.parse_results(res.result), {id: id}]);
                         });
                     }else {
                         db.close();
@@ -77,17 +76,20 @@ class Database {
         return new Promise((resolve) => {
             mongodb.connect(url, options, (err, db) => {
                 if(this.error(err)){resolve(null); return;}
-                if(forbidden_keys === undefined){
+                if(forbidden_keys == undefined){
                     forbidden_keys = ['_id'];    
                 }else {
                     forbidden_keys.push('_id');
                 }
                 query = this.remove_keys(forbidden_keys, query);
                 //query = this.remove_keys(['id', '_id'], query);
-                db.db(name).collection(collection).updateOne(target, {$set: query}, (err, res) => {
+                db.db(name).collection(collection).findOneAndUpdate(target, {$set: query}, (err, res) => {
+
+                //db.db(name).collection(collection).updateOne(target, {$set: query}, (err, res) => {
                     db.close();
                     if(this.error(err)){resolve(null); return;}
-                    resolve(this.parse_results(res.result));
+                    resolve(res);
+                    //resolve(this.parse_results(res.result));
                 });
             });
         });  
@@ -167,6 +169,10 @@ class Database {
             }
         }
         return target;
+    }
+
+    mongodb_id(id){
+        return new mongodb.ObjectID(id);
     }
 }
 

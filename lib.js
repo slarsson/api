@@ -13,55 +13,55 @@ class Library {
         this.method = req.method;
     }
 
-
-    // TEST:
-    
     // kolla att användare har access till rätt data
-    authorize(key){
-        return new Promise((resolve) => {
-            if(key == null){key = "null";}
-            this.db.find('sessions', {id: key}, (res) => {
-                if(res == null){
-                    this.render({status: false, error: "not authorized"}, 401); 
-                    return resolve(false);
-                }
-                return resolve(true);
-            });
-        });
+    // bör ej användas utan authenticate.
+    // user = user_group, target = array med user_groups
+    
+    /**
+    * Check if user in target skriv rätt osv.
+    * @param {number|string} user 
+    * @param {number} target
+    * @return {Boolean} text  
+    */
+    authorize(user, target){
+        if(target.indexOf(user) == -1){return false;}
+        return true;
     }
 
-    // kolla att användaren är inloggad
-    authenticate(id){
-        return new Promise(async (resolve) => {
-            let session = await this.db.find('sessions', {id: id});
-            if(session == null){resolve(false); return;}
+    //::kolla att användaren är inloggad
+    // returns user+session if auth ok, returns false if auth failed
+    authenticate(){
+        return new Promise(async (resolve) => {            
+            const cookie = this.parse_cookie();
+            if(cookie == undefined || cookie.session == undefined){
+                resolve(false); return;
+            }
             
-            let time  = new Date().getTime();
-            if(session.useragent != this.req.headers['user-agent'] || session.ip != this.req.connection.remoteAddress || session.expire < time){
-                console.log("error: ip/user-agent do not match session");
-                await this.db.remove('sessions', {id: id});
+            const session = await this.db.find('sessions', {id: cookie.session});
+            if(session == null){
+                console.log("error: session not found");
                 resolve(false); return;
             }
 
-            let expire = new Date().getTime() + (3600*1000);
-            await this.db.edit('sessions', {id: id}, {update: time, expire: expire});
-            console.log(session);
-            resolve(true);
+            let user = await this.db.find('users', {username: session.username});
+            if(user == null){
+                resolve(false); return;
+            }
+            user.session = session;
+
+            const time  = new Date().getTime();
+            const expire = time + (3600*1000);
+
+            if(session.useragent != this.req.headers['user-agent'] || session.ip != this.req.connection.remoteAddress || session.expire < time){
+                console.log("error: ip/user-agent do not match session");
+                await this.db.remove('sessions', {id: cookie.session});
+                resolve(false); return;
+            }
+
+            await this.db.edit('sessions', {id: cookie.session}, {update: time, expire: expire});
+            resolve(user);
         });
     }
-
-    
-
-    required_fields(obj){
-        let x = ["name", "city", "obj1.data"];
-    }
-
-
-
-
-
-
-    // OK:
 
     post(){
         return new Promise((resolve) => {
@@ -74,6 +74,13 @@ class Library {
                 resolve(qs.parse(body));
             });
         });
+    }
+
+    isset(input, list){
+        for(const item of list){
+            if(input[item] === undefined){return false;}
+        }
+        return true;
     }
 
     merge(query, template){
@@ -142,10 +149,10 @@ class Library {
         return null;
     }
 
-    // lenght: lenght of string, empty = fixed size between 5-15
+    // lenght: lenght of string, empty => size between 5-15
     random_id(length){
+        const data = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         let id = "";
-        let data = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         let n = Math.floor(Math.random() * 5) + 15;
         if(Number.isInteger(length)){n = length;}
 
@@ -167,19 +174,23 @@ class Library {
         return obj;
     }
 
-    hash(string){
-        let hash =  crypto.createHash('sha256'); 
-        hash.update(string);
+    hash(string, salt){
+        let hash = crypto.createHash('sha256'); 
+        if(salt == undefined){
+            hash.update(string);
+        }else {
+            hash.update(salt+string+salt);
+        }
         return hash.digest('hex');
     }
 
-    render(json, http_status_code){
+    render(json, http_status_code, option){
         if(http_status_code === undefined){http_status_code = 200;}
         this.res.setHeader('Content-Type', 'application/json');
         this.res.setHeader('Access-Control-Allow-Origin','*');
         this.res.setHeader('Access-Control-Allow-Headers','Origin, Content-type, Accept');
         this.res.setHeader('Access-Control-Allow-Methods','GET, POST, PATCH, PUT, DELETE, HEAD, OPTIONS');
-        this.res.writeHead(http_status_code);
+        this.res.writeHead(http_status_code, option);
         this.res.end(JSON.stringify(json, null, 0));    
     }  
 }

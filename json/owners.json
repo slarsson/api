@@ -1,0 +1,10 @@
+{
+    "user": {
+        "add": {
+            "owners": ["admin", "greger"]
+        },
+        "remove": {
+            "owners": ["admin", "greger"]
+        }
+    }
+}

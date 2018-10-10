@@ -4,70 +4,73 @@ const LIBRARY = require('../lib.js');
 
 class Login extends LIBRARY {
     constructor(req, res, query){
-        super(req, res);
-        this.query = this.format(query);
-        this.id = this.extract_value('id', this.query);
+        super(req, res);   
     }
 
     index(){
-        if(this.method == 'GET'){this.get(); return;}
-        if(this.method == 'POST'){this.add(); return;}
-        if(this.method == 'DELETE'){this.remove(); return;}
-        this.render({status: "method not found"});
+        if(this.method == 'GET'){this.status(); return;}
+        if(this.method == 'POST'){this.check(); return;}
+        this.render({status: false});
     }
 
-    async _sessions(){
-        this.render(await this.db.find_all('sessions', {}));
-    }
-
-    async _test(){
-        let cookie = this.parse_cookie();
-        console.log(cookie.session);
-        //"qrYU8b6VDU7GzAe"
-        if(!await this.authenticate(cookie.session)){
-            this.render({error: "my error"}, 401);
+    async status(){
+        let session = await this.authenticate();
+        if(session){
+            this.render(session);
+            /*this.render({
+                login: true,
+                username: session.username,
+                session: session.id
+            });*/
             return;
         }
-        this.render(cookie);
+        this.render({login: false});
     }
 
-    async get(){
-        this.render(await this.db.find_all('users', this.query));
-        //this.render(await this.db.find_all('sessions', this.query));
-    }
-
-    async add(){
-        let data = await this.post();
-
-        if((await this.db.count('users', {username: data.username})) != 0){
-            this.render({test: "username exists"});
+    async check(){
+        let input = await this.post();
+        
+        if(input.username == undefined || input.password == undefined){
+            this.render({login: false});
             return;
         }
 
-        let input = {
-            username: data.username,
-            password: this.hash(data.password),
-            data: 'test'
-        }
+        let user = await this.db.find('users', {username: input.username});
+        let password = this.hash(input.password, (input.username+'nm/&(xx2d329738d2b36#'));
 
-        this.render(await this.db.insert('users', input));
-    }
-
-    async remove(){
-        this.render(await this.db.remove('users', {username: this.query.username}));
-    }
-
-    async _update_password(){
-        if((await this.db.count('users', {username: this.query.username})) == 0){
-            this.render({test: "user not found"});
+        if(user.password != password){
+            this.render({login: false});
             return;
         }
         
-        this.render(await this.db.edit('users', {username: this.query.username}, {password: this.hash(this.query.password)}));
+        let cookie = this.parse_cookie();
+        if(cookie != undefined && cookie.session != undefined){
+            this.db.remove('sessions', {id: cookie.session});
+        }
+
+        let time  = new Date().getTime();
+        let expire = time + (3600*1000);
+        let session = {
+            username: user.username,
+            update: time,
+            expire: expire,
+            ip: this.req.connection.remoteAddress,
+            useragent: this.req.headers['user-agent']
+        };
+
+        let data = await this.db.insert_with_unique_id('sessions', session, this.random_id, 'id');
+        let id = data[1].id;
+
+        this.render({login: true}, 200, {'Set-Cookie':'session='+id+'; path=/'}); 
     }
 
-    //BRA ATT KOMMA IHÅG:
-        //let data = await Promise.all([this.post(), this.get_template('test_input')]);
+    _logout(){
+        let cookie = this.parse_cookie();
+        if(cookie != undefined && cookie.session != undefined){
+            this.db.remove('sessions', {id: cookie.session});
+        }
+        this.render({logout: true}, 200, {'Set-Cookie':'session=null; path=/'});
+    }
 }
 
 module.exports = Login;
