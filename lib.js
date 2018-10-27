@@ -13,22 +13,7 @@ class Library {
         this.method = req.method;
     }
 
-    // kolla att användare har access till rätt data
-    // bör ej användas utan authenticate.
-    // user = user_group, target = array med user_groups
-    
-    /**
-    * Check if user in target skriv rätt osv.
-    * @param {number|string} user 
-    * @param {number} target
-    * @return {Boolean} text  
-    */
-    authorize(user, target){
-        if(target.indexOf(user) == -1){return false;}
-        return true;
-    }
-
-    //::kolla att användaren är inloggad
+    // check login status
     // returns user+session if auth ok, returns false if auth failed
     authenticate(){
         return new Promise(async (resolve) => {            
@@ -45,21 +30,23 @@ class Library {
 
             let user = await this.db.find('users', {username: session.username});
             if(user == null){
+                this.db.remove('sessions', {id: cookie.session});
                 resolve(false); return;
             }
-            user.session = session;
 
             const time  = new Date().getTime();
             const expire = time + (3600*1000);
 
             if(session.useragent != this.req.headers['user-agent'] || session.ip != this.req.connection.remoteAddress || session.expire < time){
                 console.log("error: ip/user-agent do not match session");
-                await this.db.remove('sessions', {id: cookie.session});
-                resolve(false); return;
+                resolve(false);
+                this.db.remove('sessions', {id: cookie.session});
+                return;
             }
-
-            await this.db.edit('sessions', {id: cookie.session}, {update: time, expire: expire});
-            resolve(user);
+            
+            user.session = session;
+            resolve(user);    
+            this.db.edit('sessions', {id: cookie.session}, {update: time, expire: expire});
         });
     }
 

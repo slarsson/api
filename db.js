@@ -6,12 +6,12 @@ const options = {useNewUrlParser:true};
 const name = 'vod';
 
 class Database {
-    find(collection, query){
+    find(collection, query, projection){
         return new Promise((resolve) => {
             mongodb.connect(url, options, (err, db) => {
                 if(this.error(err)){resolve(null); return;
                 }
-                db.db(name).collection(collection).findOne(query, (err, res) => {
+                db.db(name).collection(collection).findOne(query, {projection: projection}, (err, res) => {
                     db.close();
                     if(this.error(err)){resolve(null); return;}
                     resolve(res);
@@ -20,11 +20,13 @@ class Database {
         });
     }
 
-    find_all(collection, query){
+    find_all(collection, query, projection, sort, limit, skip){
+        if(limit == null){limit = 0;}
+        if(skip == null){skip = 0;}
         return new Promise((resolve) => {
             mongodb.connect(url, options, (err, db) => {
                 if(this.error(err)){resolve(null); return;}
-                db.db(name).collection(collection).find(query).toArray((err, res) => {
+                db.db(name).collection(collection).find(query, {projection: projection}).sort(sort).skip(skip).limit(limit).toArray((err, res) => {
                     db.close();
                     if(this.error(err)){resolve(null); return;}
                     resolve(res);
@@ -72,6 +74,7 @@ class Database {
         });
     }
 
+    // fixa??
     edit(collection, target, query, forbidden_keys){
         return new Promise((resolve) => {
             mongodb.connect(url, options, (err, db) => {
