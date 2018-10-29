@@ -14,9 +14,9 @@ const server = http.createServer((req, res) => {
     try {
         let target = {};
         if(input.path.length != 0){
-            target = require('./controllers/'+input.path[0]+'.js');
+            target = require('./src/'+input.path[0]+'.js');
         }else {
-            target = require('./controllers/index.js');
+            target = require('./src/index.js');
         }
         const obj = new target(req, res, input.query);
         

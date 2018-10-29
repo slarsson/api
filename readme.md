@@ -1,19 +1,13 @@
 ## VIKTIGT:
 Fixa korrekta cors-headers
 
-## HUR:
-???
-
 ## GROUPS:
-0: ..
-1: admin
-2: (övriga)
+0: root : kan ändra på 'admin'
+1: admin : kan ändra på 'users' + lägga till nya användare
+2: users : ''
 
 ## OKLART (?)
-* plocka bort gammal session om ny inloggning
-* POST användarnamn, sanitaize??
 * ta bort '_id' från find och find_all
-
 * null eller "null" för input?
 * request limit?
 * findandmodify?

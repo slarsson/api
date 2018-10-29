@@ -174,7 +174,8 @@ class Library {
     render(json, http_status_code, option){
         if(http_status_code === undefined){http_status_code = 200;}
         this.res.setHeader('Content-Type', 'application/json');
-        this.res.setHeader('Access-Control-Allow-Origin','*');
+        this.res.setHeader('Access-Control-Allow-Origin','http://localhost:3000');
+        this.res.setHeader('Access-Control-Allow-Credentials','true');
         this.res.setHeader('Access-Control-Allow-Headers','Origin, Content-type, Accept');
         this.res.setHeader('Access-Control-Allow-Methods','GET, POST, PATCH, PUT, DELETE, HEAD, OPTIONS');
         this.res.writeHead(http_status_code, option);

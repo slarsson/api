@@ -3,43 +3,33 @@
 const LIBRARY = require('../lib.js');
 
 class Login extends LIBRARY {
-    constructor(req, res, query){
+    constructor(req, res){
         super(req, res);   
     }
 
     index(){
-        if(this.method == 'GET'){this.status(); return;}
         if(this.method == 'POST'){this.check(); return;}
-        this.render({status: false});
-    }
-
-    async status(){
-        const session = await this.authenticate();
-        if(session){
-            this.render(session);
-            return;
-        }
-        this.render({login: false});
+        this.render({login: false}, 404);
     }
 
     async check(){
         const input = await this.post();
 
-        if(input.username == undefined || input.password == undefined){
+        if(input.username == null || input.password == null){
             this.render({login: false});
             return;
         }
 
-        const user = await this.db.find('users', {username: input.username});
-        const password = this.hash(input.password, (input.username+'nm/&(xx2d329738d2b36#'));
+        const user = await this.db.find('users', {username: input.username}, {username: 1, password: 1});
+        const hash = this.hash(input.password, (input.username+'nm/&(xx2d329738d2b36#'));
 
-        if(user == null || user.password != password){
+        if(user == null || user.password != hash){
             this.render({login: false});
             return;
         }
         
         const cookie = this.parse_cookie();
-        if(cookie != undefined && cookie.session != undefined){
+        if(cookie != null && cookie.session != null){
             this.db.remove('sessions', {id: cookie.session});
         }
 

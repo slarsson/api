@@ -74,25 +74,23 @@ class Database {
         });
     }
 
-    // fixa??
+    // "query" != null !!!
     edit(collection, target, query, forbidden_keys){
         return new Promise((resolve) => {
             mongodb.connect(url, options, (err, db) => {
                 if(this.error(err)){resolve(null); return;}
+                
                 if(forbidden_keys == undefined){
                     forbidden_keys = ['_id'];    
                 }else {
                     forbidden_keys.push('_id');
                 }
                 query = this.remove_keys(forbidden_keys, query);
-                //query = this.remove_keys(['id', '_id'], query);
-                db.db(name).collection(collection).findOneAndUpdate(target, {$set: query}, (err, res) => {
 
-                //db.db(name).collection(collection).updateOne(target, {$set: query}, (err, res) => {
+                db.db(name).collection(collection).updateOne(target, {$set: query}, (err, res) => {
                     db.close();
                     if(this.error(err)){resolve(null); return;}
-                    resolve(res);
-                    //resolve(this.parse_results(res.result));
+                    resolve(this.parse_results(res.result));
                 });
             });
         });  
