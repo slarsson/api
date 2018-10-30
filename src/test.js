@@ -25,7 +25,7 @@ class Test extends LIBRARY {
     }
 
     async _add(){
-        let json = await this.get_template("t");
+        let json = await this.get_template("./_assets/t.json");
         json.id = this.random_id();
         this.render(json);
         //this.db.insert('tournaments', json);

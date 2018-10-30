@@ -91,9 +91,9 @@ class Library {
         return template;
     }
 
-    get_template(filename){
+    get_template(path){
         return new Promise((resolve) => {
-            fs.readFile("./json/"+filename+".json", (err, data) => {
+            fs.readFile(path, (err, data) => {
                 let obj = {};
                 try{
                     if(err){throw err;} 

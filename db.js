@@ -9,8 +9,7 @@ class Database {
     find(collection, query, projection){
         return new Promise((resolve) => {
             mongodb.connect(url, options, (err, db) => {
-                if(this.error(err)){resolve(null); return;
-                }
+                if(this.error(err)){resolve(null); return;}
                 db.db(name).collection(collection).findOne(query, {projection: projection}, (err, res) => {
                     db.close();
                     if(this.error(err)){resolve(null); return;}
@@ -35,11 +34,11 @@ class Database {
         });
     }
 
-    insert(collection, query){
+    insert(collection, data){
         return new Promise((resolve) => {
             mongodb.connect(url, options, (err, db) => {
                 if(this.error(err)){resolve(null); return;}
-                db.db(name).collection(collection).insertOne(query, (err, res) => {
+                db.db(name).collection(collection).insertOne(data, (err, res) => {
                     db.close();
                     if(this.error(err)){resolve(null); return;}
                     resolve(this.parse_results(res.result));
@@ -48,66 +47,47 @@ class Database {
         });
     }
 
-    insert_with_unique_id(collection, query, random, key){
+    insert_with_unique_id(collection, data, random, random_length, key){
         return new Promise((resolve) => {
-            mongodb.connect(url, options, (err, db) => {
+            mongodb.connect(url, options, async (err, db) => {
                 if(this.error(err)){resolve(null); return;}
                 
                 let dbo = db.db(name);
-                let id = random();
+                let id = random(random_length);
 
-                dbo.collection(collection).findOne({[key]: id}, (err, res) => {
+                while(await dbo.collection(collection).countDocuments({[key]: id}) != 0){
+                    id = random(random_length);
+                    console.log("duplicate id :(");
+                }
+                
+                data[key] = id;
+                dbo.collection(collection).insertOne(data, (err, res) => {
+                    db.close();
                     if(this.error(err)){resolve(null); return;}
-                    if(res == null){
-                        query.id = id;
-                        dbo.collection(collection).insertOne(query, (err, res) => {
-                            db.close();
-                            if(this.error(err)){resolve(null); return;}
-                            resolve([this.parse_results(res.result), {id: id}]);
-                        });
-                    }else {
-                        db.close();
-                        this.insert_with_unique_id(collection, query, random, cb);
-                    }
+                    resolve([this.parse_results(res.result), {[key]: id}]);
                 });
             });
         });
     }
 
-    // "query" != null !!!
-    edit(collection, target, query, forbidden_keys){
+    //?? _id???
+    edit(collection, target, set, push, unset){
         return new Promise((resolve) => {
             mongodb.connect(url, options, (err, db) => {
                 if(this.error(err)){resolve(null); return;}
                 
-                if(forbidden_keys == undefined){
-                    forbidden_keys = ['_id'];    
-                }else {
-                    forbidden_keys.push('_id');
-                }
-                query = this.remove_keys(forbidden_keys, query);
+                let obj = {}
+                if(set != null){obj.$set = set;}
+                if(push != null){obj.$push = push;}
+                if(unset != null){obj.$unset = unset;}
 
-                db.db(name).collection(collection).updateOne(target, {$set: query}, (err, res) => {
+                db.db(name).collection(collection).updateOne(target, obj, (err, res) => {
                     db.close();
                     if(this.error(err)){resolve(null); return;}
                     resolve(this.parse_results(res.result));
                 });
             });
         });  
-    }
-
-    unset(collection, target, query){
-        return new Promise((resolve) => {
-            mongodb.connect(url, options, (err, db) => {
-                if(this.error(err)){resolve(null); return;}
-                query = this.remove_keys(['id', '_id'], query);
-                db.db(name).collection(collection).updateOne(target, {$unset: query}, (err, res) => {
-                    db.close();
-                    if(this.error(err)){resolve(null); return;}
-                    resolve(this.parse_results(res.result));
-                });
-            });
-        });   
     }
 
     remove(collection, query){

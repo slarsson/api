@@ -1,6 +1,7 @@
 'use strict';
 
 const LIBRARY = require('../lib.js');
+const SALT = 'nm/&(xx2d329738d2b36#';
 
 class User extends LIBRARY {
     constructor(req, res, query){
@@ -26,7 +27,7 @@ class User extends LIBRARY {
     }
 
     async add(user){
-        if(![0, 1].includes(user.group)){this.render({}, 401); return;}
+        if(!(user.group == 0 || user.group == 1)){this.render({}, 401); return;}
 
         const input = await this.post();
         if(!this.isset(input, ["username", "password"])){
@@ -44,7 +45,7 @@ class User extends LIBRARY {
 
         const data = {
             username: username,
-            password: this.hash(input.password, (username+'nm/&(xx2d329738d2b36#')),
+            password: this.hash(input.password, (username+SALT)),
             group: 2 // default!
         }
 
@@ -57,7 +58,7 @@ class User extends LIBRARY {
         let password_required = true;
         
         if(this.query.username != null){
-            if(![0, 1].includes(user.group)){this.render({}, 401); return;}
+            if(!(user.group == 0 || user.group == 1)){this.render({}, 401); return;}
             
             const target = await this.db.find('users', {username: this.query.username});
             if(target == null || (user.group == 1 && (target.group == 1 || target.group == 0))){
@@ -71,8 +72,8 @@ class User extends LIBRARY {
         if(this.query.password != null){
             if(password_required){
                 if(this.query.current_password != null){
-                    const current = this.hash(this.query.current_password, (user.username+'nm/&(xx2d329738d2b36#'));
-                    changes.password = this.hash(this.query.password, (user.username+'nm/&(xx2d329738d2b36#'));
+                    const current = this.hash(this.query.current_password, (user.username+SALT));
+                    changes.password = this.hash(this.query.password, (user.username+SALT));
                     if(current != user.password){
                         this.render ({error: "passwords did not match"}); return;
                     }
@@ -105,7 +106,7 @@ class User extends LIBRARY {
     }
 
     async remove(user){
-        if(![0, 1].includes(user.group)){this.render({}, 401); return;}
+        if(!(user.group == 0 || user.group == 1)){this.render({}, 401); return;}
  
         if(this.query.username == null){
             this.render({status: false, error: "empty fields"}); return;
