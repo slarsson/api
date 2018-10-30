@@ -70,7 +70,6 @@ class Database {
         });
     }
 
-    //?? _id???
     edit(collection, target, set, push, unset){
         return new Promise((resolve) => {
             mongodb.connect(url, options, (err, db) => {

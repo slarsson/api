@@ -12,14 +12,14 @@ class User extends LIBRARY {
     async index(){
         const session = await this.authenticate();
         if(!session){this.render({}, 401); return;}
-        if(this.method == 'GET'){this.info(session); return;}
+        if(this.method == 'GET'){this.self(session); return;}
         if(this.method == 'POST'){this.add(session); return;}
         if(this.method == 'PATCH'){this.update(session); return;}
         if(this.method == 'DELETE'){this.remove(session); return;}
         this.render({status: false}, 404);
     }
 
-    info(user){
+    self(user){
         this.render({
             username: user.username,
             group: user.group
@@ -81,7 +81,7 @@ class User extends LIBRARY {
                     this.render({status:false, error: "current_password missing"}); return;
                 }  
             }else {
-                changes.password = this.hash(this.query.new_password, (user.username+'nm/&(xx2d329738d2b36#'));
+                changes.password = this.hash(this.query.password, (user.username+'nm/&(xx2d329738d2b36#'));
             }   
         }
 
@@ -122,7 +122,7 @@ class User extends LIBRARY {
         }
         
         if(target.group == 0 || (user.group == 1 && target.group == 1)){
-            this.render({status: false, error: "nej."}); return;
+            this.render({status: false, error: "nej."}, 401); return;
         }
 
         this.render(await this.db.remove('users', {username: this.query.username}));

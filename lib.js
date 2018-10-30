@@ -38,7 +38,7 @@ class Library {
             const expire = time + (3600*1000);
 
             if(session.useragent != this.req.headers['user-agent'] || session.ip != this.req.connection.remoteAddress || session.expire < time){
-                console.log("error: ip/user-agent do not match session");
+                console.log("error: timeout or ip/user-agent do not match session");
                 resolve(false);
                 this.db.remove('sessions', {id: cookie.session});
                 return;
@@ -105,6 +105,7 @@ class Library {
     }
 
     sanitize(text){
+        if(typeof text == 'object'){text = JSON.stringify(text);}
         text = require('sanitize-html')(text, {allowedTags: [], allowedAttributes: []});
         return text.trim();
     }

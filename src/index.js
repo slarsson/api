@@ -5,7 +5,7 @@ const LIBRARY = require('../lib.js');
 class Index extends LIBRARY {
     constructor(req, res, query){
         super(req, res);
-        this.query = this.format(query);
+        this.query = query;
     }
 
     async index(){
@@ -13,7 +13,7 @@ class Index extends LIBRARY {
             let projection = {}; 
             projection._id = 0;
             
-            const types = ["groups", "bracket", "name", "id"];
+            const types = ["groups", "bracket", "name", "id", "teams"];
             if(this.query.type != null && typeof this.query.type != 'number'){
                 const items = this.query.type.split(':');
                 items.map((item) => {
