@@ -63,9 +63,17 @@ class Library {
         });
     }
 
-    isset(input, list){
+    isset(input, list, empty){
         for(const item of list){
-            if(input[item] === undefined){return false;}
+            if(input[item] == null){return false;}
+            //if(input[item] === undefined){return false;}
+        }
+        return true;
+    }
+
+    is_number(arr){
+        for(const item of arr){
+            if(typeof item !== 'number'){return false;}
         }
         return true;
     }

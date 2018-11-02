@@ -38,6 +38,11 @@ POST:
 GET:
 
 POST: 
+* name: namn på turneringen
+* group: max antal per grupp
+* type: 0 = semi, 1 = kvarts, 2 = åttondels
+* rounds: antal möten per grupp
+* team: lagnamn, ex: 'team=lag1&team=lag2' osv..
 
 PATCH:
 * t: id, turnering att ändra
@@ -45,10 +50,28 @@ PATCH:
 * remove: ta bort en eller flera 'owners'
 * name: byt namn
 * text: ändra text
-* 0,1,2, osv: ange array index för att ändra lagnamn, ex: '?2=aik&4=hammarby' 
+* 0,1,2, osv: ange array index för att ändra lagnamn, ex: '?2=aik&4=hammarby'
+* group: ange vilket grupp att 'stänga', 0,1,2, osv..
 
 DELETE:
 * t: id, vilket turnering att ta bort
+
+### ./game/
+PATCH:
+* t: id, turnering som matchen finns i
+* g: match index i listan
+* r1: resultat för index 0
+* r2: resultat för index 1
+* bracket: true = ändra match i bracket, utelämmnas ändras matcher i gruppen 'games'
+(./game/create/ = skapar bracket (då alla grupper är 'klara'), tillfällig!)
+
+
+
+
+
+
+
+
 
 # ÖVRIGT
 ## VIKTIGT:

@@ -7,4 +7,8 @@ const admin = {
 }
     
 const db = require('../db.js');
-//new db().insert('users', admin);
+/*
+new db().insert('users', admin).then((res) => {
+    console.log(res);
+});
+*/ 

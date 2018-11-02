@@ -115,6 +115,19 @@ class Database {
         });
     }
 
+    drop(collection){
+        return new Promise((resolve) => {
+            mongodb.connect(url, options, (err, db) => {
+                if(this.error(err)){resolve(null); return;}
+                db.db(name).collection(collection).deleteMany({}, (err, res) => {
+                    db.close();
+                    if(this.error(err)){resolve(null); return;}
+                    resolve(this.parse_results(res.result));
+                });
+            });
+        });
+    }
+
     error(e){
         try {
             if(e){throw e;}

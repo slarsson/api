@@ -1,6 +1,8 @@
 'use strict';
 
 const LIBRARY = require('../lib.js');
+const t = require('../tournament/create.js');
+const Progress = require('../tournament/progress.js');
 
 class Tournament extends LIBRARY {
     constructor(req, res, query){
@@ -22,36 +24,34 @@ class Tournament extends LIBRARY {
         this.render(await this.db.find_all('tournaments', {owners: user.username}, {_id: 0, name: 1, owners: 1, id: 1, created: 1}, {created: -1}));
     }
 
-
+    // check korrekt nummer eller string osv osv.. 
+    // rounds = fel!!!!
     async create(user){
-        // antal per grupp?
-        // bracket mapping?
-        // hur många möten?
-        // edge cases?
-        // kvarts- eller semi-final?
-        // så många frågor, så få svar..
+        const required = ["name", "team", "group", "rounds", "type"];
+        let input = await this.post();
 
-        const input = await this.post();
-        //this.render(input);
-    
-        const teams = ["Arsenal", "Boden BK", "IFK Norrköping", "Manchester United", "FC Barcelona", "KHK", "AIK", "Chelsea", "Brommapojkarna", "Luleå Hockey"];
+        if(!this.isset(input, required)){
+            this.render({status: false, error: "empty fields"}); return;
+        }
 
+        let teams = this.extract_value('team', input);
+        input = this.format(input);
 
+        
+        if(!this.is_number([input.type, input.group, input.rounds])){
+            this.render({status: false, error: "NaN"}); return;
+        }
+   
+        if(typeof teams === 'string'){teams = [teams];}
+        teams = teams.map((item) => {return this.sanitize(item);});
 
-        let tournament = {
-            name: "test",
-            created: new Date().getTime(),
-            owners: [user.username],
-            teams: teams,
-            groups: [
-                [0, 1, 2, 3, 4],
-                [5, 6, 7, 8, 9]
-            ],
-            games: [],
-            bracket: []
-        };
-
-        this.render(await this.db.insert_with_unique_id('tournaments', tournament, this.random_id, null, 'id'));
+        const {data, status, error} = await new t(user, input, teams).generate();
+        if(!status){
+            this.render({status: false, error: error}); return;
+        }
+        
+        //this.render(data);
+        this.render(await this.db.insert_with_unique_id('tournaments', data, this.random_id, null, 'id'));
     }
 
     async update(user){
@@ -93,6 +93,18 @@ class Tournament extends LIBRARY {
 
         let changes = {owners: owners};
 
+        if(this.query.group != null){
+            if(target.groups[this.query.group] == null){
+                this.render({status: false, error: "group not found"}); return;
+            }
+            if(new Progress(target).complete(this.query.group, true)){
+                changes['groups.' + this.query.group + '.completed'] = true;
+            }else {
+                this.render({status: false, error: "group not completed"}); return;
+            }
+        }
+
+
         const allowed = ["name", "text"];  
         for(const item of allowed){
             if(this.query[item] != null){
@@ -128,7 +140,7 @@ class Tournament extends LIBRARY {
     get(){
         return new Promise(async (resolve) => {
             if(this.query.t != null){
-                const target = await this.db.find('tournaments', {id: this.query.t}, {teams: 1, owners: 1, name: 1, id: 1, _id: 0});
+                const target = await this.db.find('tournaments', {id: this.query.t});
                 if(target != null){
                     resolve(target); return;
                 }
