@@ -64,8 +64,6 @@ class Game extends Library {
 
     // TEST:
     async _create(){
-        
-
         const t = await this.db.find('tournaments', {id: this.query.t});
         if(t == null){
             this.render(null); return;

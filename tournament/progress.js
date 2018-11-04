@@ -115,72 +115,87 @@ class Progress {
     // skapar en fullständig lista, om alla grupper är 'färdiga' 
     get_bracket(){
         let out = [];
-        
-        let k = 0;
+        let i = 0;
+
         for(const item of this.tournament.groups){
             if(item.completed == false){
                 console.log("alla grupper ej klara!");
                 //return false;
             }
-            out = out.concat(this.group_winners(k));
-            k++;
+            out = out.concat(this.group_winners(i));
+            i++;
         }
-
         return this.complete_bracket(out);
     }
 
-    test(input){
-        input = Array.from(input);
-
+    // fungerare det här ens!?!?!?
+    test(list){
+        let empty = 0;
+        let input = list.filter((item) => {
+            if(item != null){return item;}else {empty++;}
+        })
+        
         for(let i = 0; i < input.length-1; i++){
             for(let j = i+1; j < input.length; j++){
-                if(input[j] == null || input[i] == null){
-                    [input[j], input[i]] = [input[i], input[j]];
-                    continue;
-                }
+                if(input[j].pos < 0){input[j].pos = (-100)*input[j].pos;}// efterbliven lösning..
+                if(input[i].pos < 0){input[i].pos = (-100)*input[i].pos;}
                 if(input[j].pos < input[i].pos){
                     [input[j], input[i]] = [input[i], input[j]];
                 }
             }
         }
+        for(let i = 0; i < empty; i++){input.push(null);}
 
-        let bottom = [];
-        let vafan = input.length-1;
-        let vafan2 = 0;
+        let top = input.slice(0, (input.length/2));
+        let bottom = input.slice((input.length/2), input.length).reverse();
+
+        let games = [];
         for(let i = 0; i < (input.length/2); i++){
-            if(input[i] == null || input[i].pos < 0){
-                bottom.push(input[i]);
-                vafan2++;
-            }else {
-                bottom.push(input[vafan]);
-                vafan--;
+            let index;
+            if(top[i] != null && bottom[i] != null){
+                if(top[i].group == bottom[i].group){
+                    if(bottom[i].group > -1){
+                        let stop = true;
+                        let k = 1;
+                        while(stop){
+                            if((k + i - 1) < (input.length/2 - 1)){
+                                if(bottom[i].group != bottom[i+k].group || bottom[i].group == -1){
+                                    [bottom[i], bottom[i+k]] = [bottom[i+k], bottom[i]];
+                                    stop = false;
+                                }
+                                k++;
+                            }else {
+                                stop = false;
+                            }
+                        }
+                    }
+                }
             }
-        }
 
-        let top = [];
-        for(let i = 0; i < 4; i++){
-            top.push(input[vafan2]);
-            vafan2++;
+            games.push(top[i]);
+            games.push(bottom[i]);
         }
         
-        console.log(bottom);
-        console.log(top);
+        let output = Array(games.length);
+        let a = 0;
+        let b = games.length/2;
 
-        let out = [];
-        for(let i = 0; i < input.length/2; i++){
-            out.push(top[i]);
-            out.push(bottom[i]);
+        for(let i = 0; i < games.length; i+=4){
+            output[a] = games[i];
+            output[a + 1] = games[i + 1];
+            output[a + b] = games[i + 2];
+            output[a + b + 1] = games[i + 3];
+            a+=2;
         }
         
-        console.log(out);
-        return out;
+        return output;
+        //console.log(output);
+        //return games;
     }
 
     // lägger till 'listan' till bracket, bor göras på annat sätt asså..
     populate_bracket(list){
-        //TEST:
-        list = this.test(list);
-        //..
+        list = this.test(list);// test..
         
         let r;
         const r4 = [0, 1, 4, 5];
@@ -270,7 +285,7 @@ class Progress {
         if(n == 16){r = this.r16;}
 
         for(let i = 0; i < bracket.length; i++){
-            if(bracket[i].teams[0] === false && bracket[i].teams[1] === false && bracket[i].status == false){
+            if(bracket[i].teams[0] === false && bracket[i].teams[1] === false && bracket[i].status === false){
                 if(r[i][0] == null){continue;}
                 bracket[i].status = true;
                 bracket[r[i][0]].teams[r[i][1]] = false;
@@ -280,7 +295,7 @@ class Progress {
             }
         }
 
-        for(let i = 0; i < bracket.length; i++){
+        const check = (i) => {
             let index = null;
             if(bracket[i].teams[0] === false && typeof bracket[i].teams[1] === 'number'){
                 index = 1;
@@ -297,6 +312,9 @@ class Progress {
             }
         }
 
+        const l = Math.floor(bracket.length/2);
+        for(let i = 0; i < l; i++){check(i);}
+        for(let i = bracket.length-1; i > l; i--){check(i);}
         return bracket;
     }
 }
