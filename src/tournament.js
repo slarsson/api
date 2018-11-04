@@ -1,10 +1,10 @@
 'use strict';
 
-const LIBRARY = require('../lib.js');
-const t = require('../tournament/create.js');
+const Library = require('../lib.js');
+const Create = require('../tournament/create.js');
 const Progress = require('../tournament/progress.js');
 
-class Tournament extends LIBRARY {
+class Tournament extends Library {
     constructor(req, res, query){
         super(req, res);
         this.query = query;
@@ -25,7 +25,7 @@ class Tournament extends LIBRARY {
     }
 
     // check korrekt nummer eller string osv osv.. 
-    // rounds = fel!!!!
+    // rounds får inte vara negativ, fixa kanske?
     async create(user){
         const required = ["name", "team", "group", "rounds", "type"];
         let input = await this.post();
@@ -45,12 +45,11 @@ class Tournament extends LIBRARY {
         if(typeof teams === 'string'){teams = [teams];}
         teams = teams.map((item) => {return this.sanitize(item);});
 
-        const {data, status, error} = await new t(user, input, teams).generate();
+        const {data, status, error} = await new Create(user, input, teams).generate();
         if(!status){
             this.render({status: false, error: error}); return;
         }
-        
-        //this.render(data);
+
         this.render(await this.db.insert_with_unique_id('tournaments', data, this.random_id, null, 'id'));
     }
 
@@ -99,11 +98,11 @@ class Tournament extends LIBRARY {
             }
             if(new Progress(target).complete(this.query.group, true)){
                 changes['groups.' + this.query.group + '.completed'] = true;
+                // lägg till i bracket? om alla grupper är klara?
             }else {
                 this.render({status: false, error: "group not completed"}); return;
             }
         }
-
 
         const allowed = ["name", "text"];  
         for(const item of allowed){

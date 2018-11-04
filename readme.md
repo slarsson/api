@@ -58,7 +58,7 @@ DELETE:
 
 ### ./game/
 PATCH:
-* t: id, turnering som matchen finns i
+* t: id, turneringen som matchen finns i
 * g: match index i listan
 * r1: resultat för index 0
 * r2: resultat för index 1
@@ -74,8 +74,6 @@ PATCH:
 
 
 # ÖVRIGT
-## VIKTIGT:
-Fixa korrekta cors-headers
 
 ## GROUPS:
 0: root : kan ändra på 'admin'
@@ -83,8 +81,7 @@ Fixa korrekta cors-headers
 2: users : ''
 
 ## OKLART (?)
-* ta bort '_id' från find och find_all
+* ta bort '_id' från find och find_all?
 * null eller "null" för input?
 * request limit?
 * findandmodify?
-* mongodb indexering??

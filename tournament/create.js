@@ -1,7 +1,5 @@
 'use strict';
 
-const SIZE = [3, 7, 15];
-
 class Create {
     constructor(creator, data, teams){
         this.creator = creator;
@@ -13,7 +11,7 @@ class Create {
     generate(){
         const groups = this.groups(this.data.group, this.teams.length);
         if(!groups){
-            return {data: null, status: false, error: "my error"};
+            return {data: null, status: false, error: "atleast two teams per group"};
         }
 
         const bracket = this.bracket(this.data.type, groups.length);
@@ -100,9 +98,11 @@ class Create {
     }
 
     bracket(type, number_of_groups){
-        if(type < 0 || type > SIZE.length || number_of_groups > (SIZE[type]+1)){return false;}
+        const size = [3, 7, 15];
         let output = [];
-        for(let i = 0; i < SIZE[type]; i++){
+
+        if(type < 0 || type > size.length || number_of_groups > (size[type]+1)){return false;}
+        for(let i = 0; i < size[type]; i++){
             output.push({
                 teams: [null, null], 
                 results: [null, null], 

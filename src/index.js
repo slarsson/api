@@ -1,8 +1,8 @@
 'use strict';
 
-const LIBRARY = require('../lib.js');
+const Library = require('../lib.js');
 
-class Index extends LIBRARY {
+class Index extends Library {
     constructor(req, res, query){
         super(req, res);
         this.query = query;

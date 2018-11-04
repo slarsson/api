@@ -1,13 +1,11 @@
-//const quarter_finals = [8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, null, null, 15, 15, 16, 16, 17, 17, 18, 18, 19, 19, 20, 20, 21, 21];
-//const entry_quater = [[0, 2, 4, 6], [22, 24, 26, 28], [1, 3, 5, 7], [23, 25, 27, 29]];      
-//const semi_finals = [4, 4, 5, 5, 6, 6, null, null, 7, 7, 8, 8, 9, 9]; 
-//const entry_semi = [[0, 2], [10, 12], [1, 3], [11, 13]];
-
 'use strict';
 
 class Progress {
     constructor(tournament){
         this.tournament = tournament;
+        this.r4 = [[1, 0], [null, null], [1, 1]];
+        this.r8 = [[2, 0], [2, 1], [3, 0], [null, null], [3, 1], [4, 0], [4, 1]];
+        this.r16 = [[4, 0], [4, 1], [5, 0], [5, 1], [6, 0], [6, 1], [7, 0], [null, null], [7, 1], [8, 0], [8, 1], [9, 0], [9, 1], [10, 0], [10, 1]];
     }
 
     // kollar om gruppen är 'färdig' och vilka som går vidare
@@ -17,7 +15,6 @@ class Progress {
     complete(id, boolean){
         for(const item of this.tournament.games){
             if(item.status == false && item.group == id){
-                console.log("group not completed..");
                 return false;
             }
         }
@@ -122,8 +119,8 @@ class Progress {
         let k = 0;
         for(const item of this.tournament.groups){
             if(item.completed == false){
-                console.log("alla grupper måste vara färdiga..");
-                return false;
+                console.log("alla grupper ej klara!");
+                //return false;
             }
             out = out.concat(this.group_winners(k));
             k++;
@@ -132,8 +129,59 @@ class Progress {
         return this.complete_bracket(out);
     }
 
-    // lägga till 'listan' till bracket, bor göras på annat sätt asså..
+    test(input){
+        input = Array.from(input);
+
+        for(let i = 0; i < input.length-1; i++){
+            for(let j = i+1; j < input.length; j++){
+                if(input[j] == null || input[i] == null){
+                    [input[j], input[i]] = [input[i], input[j]];
+                    continue;
+                }
+                if(input[j].pos < input[i].pos){
+                    [input[j], input[i]] = [input[i], input[j]];
+                }
+            }
+        }
+
+        let bottom = [];
+        let vafan = input.length-1;
+        let vafan2 = 0;
+        for(let i = 0; i < (input.length/2); i++){
+            if(input[i] == null || input[i].pos < 0){
+                bottom.push(input[i]);
+                vafan2++;
+            }else {
+                bottom.push(input[vafan]);
+                vafan--;
+            }
+        }
+
+        let top = [];
+        for(let i = 0; i < 4; i++){
+            top.push(input[vafan2]);
+            vafan2++;
+        }
+        
+        console.log(bottom);
+        console.log(top);
+
+        let out = [];
+        for(let i = 0; i < input.length/2; i++){
+            out.push(top[i]);
+            out.push(bottom[i]);
+        }
+        
+        console.log(out);
+        return out;
+    }
+
+    // lägger till 'listan' till bracket, bor göras på annat sätt asså..
     populate_bracket(list){
+        //TEST:
+        list = this.test(list);
+        //..
+        
         let r;
         const r4 = [0, 1, 4, 5];
         const r8 = [0, 1, 2, 3, 10, 11, 12, 13];
@@ -161,45 +209,95 @@ class Progress {
             }
             x += 2;
         }
-
-        return this.tournament.bracket;
+        return this.empty(this.tournament.bracket, n);
     }
     
     // lägger till resultat för en match + skapar nästa match
-    // OBS: kollar inte om 'teams' false, fixa det!
     bracket(id, r1, r2){
-        const min = 0;
-        const max = 99;
+        const min = 0, max = 999;
         if(r1 == r2 || r1 < min || r2 < min || r1 > max || r2 > max){return false;}    
-        if(this.tournament.bracket[id] == null || this.tournament.bracket[id].status == true){return false;}
+        if(this.tournament.bracket[id] == null){return false;}
         if(this.tournament.bracket[id].teams[0] == null || this.tournament.bracket[id].teams[1] == null){return false;}
-
+ 
         let r;
-        const r4 = [[1, 0], [null, null], [1, 1]];
-        const r8 = [[2, 0], [2, 1], [3, 0], [null, null], [3, 1], [4, 0], [4, 1]];
-        const r16 = [[4, 0], [4, 1], [5, 0], [5, 1], [6, 0], [6, 1], [7, 0], [null, null], [7, 1], [8, 0], [8, 1], [9, 0], [9, 1], [10, 0], [10, 1]];
-        
         const n = this.tournament.bracket.length+1;
-        if(n == 4){r = r4;} else
-        if(n == 8){r = r8;} else
-        if(n == 16){r = r16;}
+        if(n == 4){r = this.r4;} else
+        if(n == 8){r = this.r8;} else
+        if(n == 16){r = this.r16;}
+
+        if(this.tournament.bracket[id].status == true){
+            if(r[id][0] !== null){
+                if(this.tournament.bracket[r[id][0]].status == true){
+                    return false;
+                }
+            }
+        }
 
         let output = {
             ['bracket.' + id + '.results.0']: r1,
             ['bracket.' + id + '.results.1']: r2,
             ['bracket.' + id + '.edit']: new Date().getTime(),
             ['bracket.' + id + '.status']: true
-            //['bracket.' + id + '.status']: false
         };
 
         let index;
         if(r1 > r2){index = 0;}else {index = 1;}
 
         if(r[id][0] != null){
+            // error om 'finalen' saknar lag, borde inte vara möjligt??
+            let i;
+            if(r[id][1] == 0){i = 1;}else {i = 0;}
+            if(this.tournament.bracket[r[id][0]].teams[i] === false){
+                if(r[r[id][0]][0] !== null){
+                    output['bracket.' + r[id][0] + '.results.' + r[id][1]] = false;
+                    output['bracket.' + r[id][0] + '.status'] = true;
+                    output['bracket.' + r[r[id][0]][0] + '.teams.' + r[r[id][0]][1]] = this.tournament.bracket[id].teams[index];
+                }
+            }
+
             output['bracket.' + r[id][0] + '.teams.' + r[id][1]] = this.tournament.bracket[id].teams[index];
             output['bracket.' + r[id][0] + '.placeholder.' + r[id][1]] =  null;
         }
         return output;
+    }
+
+    // muterar 'bracket', n = vilket storlek, 4, 8, 16
+    // fyller i tomma matcher
+    empty(bracket, n){
+        let r;
+        if(n == 4){r = this.r4;} else
+        if(n == 8){r = this.r8;} else
+        if(n == 16){r = this.r16;}
+
+        for(let i = 0; i < bracket.length; i++){
+            if(bracket[i].teams[0] === false && bracket[i].teams[1] === false && bracket[i].status == false){
+                if(r[i][0] == null){continue;}
+                bracket[i].status = true;
+                bracket[r[i][0]].teams[r[i][1]] = false;
+                bracket[r[i][0]].placeholder[r[i][1]] = 'n/a';
+                i = 0;
+                continue;
+            }
+        }
+
+        for(let i = 0; i < bracket.length; i++){
+            let index = null;
+            if(bracket[i].teams[0] === false && typeof bracket[i].teams[1] === 'number'){
+                index = 1;
+            }
+
+            if(bracket[i].teams[1] === false && typeof bracket[i].teams[0] === 'number'){
+                index = 0;
+            }
+
+            if(index !== null && r[i][0] !== null){
+                bracket[r[i][0]].teams[r[i][1]] = bracket[i].teams[index];
+                bracket[r[i][0]].placeholder[r[i][1]] = null;
+                bracket[i].status = true;
+            }
+        }
+
+        return bracket;
     }
 }
 

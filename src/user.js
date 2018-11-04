@@ -1,9 +1,9 @@
 'use strict';
 
-const LIBRARY = require('../lib.js');
-const SALT = 'nm/&(xx2d329738d2b36#';
+const Library = require('../lib.js');
+const salt = 'nm/&(xx2d329738d2b36#';
 
-class User extends LIBRARY {
+class User extends Library {
     constructor(req, res, query){
         super(req, res);
         this.query = this.format(query);
@@ -45,7 +45,7 @@ class User extends LIBRARY {
 
         const data = {
             username: username,
-            password: this.hash(input.password, (username+SALT)),
+            password: this.hash(input.password, (username+salt)),
             group: 2 // default!
         }
 
@@ -72,8 +72,8 @@ class User extends LIBRARY {
         if(this.query.password != null){
             if(password_required){
                 if(this.query.current_password != null){
-                    const current = this.hash(this.query.current_password, (user.username+SALT));
-                    changes.password = this.hash(this.query.password, (user.username+SALT));
+                    const current = this.hash(this.query.current_password, (user.username+salt));
+                    changes.password = this.hash(this.query.password, (user.username+salt));
                     if(current != user.password){
                         this.render ({error: "passwords did not match"}); return;
                     }
@@ -81,12 +81,12 @@ class User extends LIBRARY {
                     this.render({status:false, error: "current_password missing"}); return;
                 }  
             }else {
-                changes.password = this.hash(this.query.password, (user.username+'nm/&(xx2d329738d2b36#'));
+                changes.password = this.hash(this.query.password, (user.username+salt));
             }   
         }
 
         if(this.query.group != null){
-            if(!password_required && [1, 2].includes(this.query.group)){
+            if(!password_required && (this.query.group == 1 || this.query.group == 2)){
                 changes.group = this.query.group;
             }else {
                 this.render({status: false, error: "nah.."}); return;

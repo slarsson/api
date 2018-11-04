@@ -66,7 +66,6 @@ class Library {
     isset(input, list, empty){
         for(const item of list){
             if(input[item] == null){return false;}
-            //if(input[item] === undefined){return false;}
         }
         return true;
     }
@@ -74,6 +73,7 @@ class Library {
     is_number(arr){
         for(const item of arr){
             if(typeof item !== 'number'){return false;}
+            if(!Number.isInteger(item)){return false;}
         }
         return true;
     }
@@ -172,7 +172,7 @@ class Library {
 
     hash(string, salt){
         let hash = crypto.createHash('sha256'); 
-        if(salt == undefined){
+        if(salt == null){
             hash.update(string);
         }else {
             hash.update(salt+string+salt);
@@ -181,7 +181,7 @@ class Library {
     }
 
     render(json, http_status_code, option){
-        if(http_status_code === undefined){http_status_code = 200;}
+        if(http_status_code == null){http_status_code = 200;}
         this.res.setHeader('Content-Type', 'application/json');
         this.res.setHeader('Access-Control-Allow-Origin','http://localhost:3000');
         this.res.setHeader('Access-Control-Allow-Credentials','true');

@@ -1,8 +1,8 @@
 'use strict';
 
-const LIBRARY = require('../lib.js');
+const Library = require('../lib.js');
 
-class Logout extends LIBRARY {
+class Logout extends Library {
     constructor(req, res){
         super(req, res);   
     }

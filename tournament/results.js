@@ -8,15 +8,13 @@ class Results {
     }
 
     add(r1, r2){
-        const min = 0;
-        const max = 99;
+        const min = 0, max = 999;
         if(r1 < min || r2 < min || r1 > max || r2 > max){return false;}
 
         const pos1 = this.tournament.groups[this.group].teams.indexOf(this.tournament.games[this.game_id].teams[0]);
         const pos2 = this.tournament.groups[this.group].teams.indexOf(this.tournament.games[this.game_id].teams[1]);
  
-        let p1_old = 0;
-        let p2_old = 0;
+        let p1_old = 0, p2_old = 0;
         if(this.tournament.games[this.game_id].results[0] != null && this.tournament.games[this.game_id].results[1] != null){
             ({p1: p1_old, p2: p2_old} = this.points(this.tournament.games[this.game_id].results[0], this.tournament.games[this.game_id].results[1]));
         }

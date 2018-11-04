@@ -1,9 +1,9 @@
 'use strict';
 
-const LIBRARY = require('../lib.js');
-const SALT = 'nm/&(xx2d329738d2b36#';
+const Library = require('../lib.js');
+const salt = 'nm/&(xx2d329738d2b36#';
 
-class Login extends LIBRARY {
+class Login extends Library {
     constructor(req, res){
         super(req, res);   
     }
@@ -22,7 +22,7 @@ class Login extends LIBRARY {
         }
 
         const user = await this.db.find('users', {username: input.username}, {username: 1, password: 1});
-        const hash = this.hash(input.password, (input.username+SALT));
+        const hash = this.hash(input.password, (input.username + salt));
 
         if(user == null || user.password != hash){
             this.render({login: false, error: "wrong password or username"});
@@ -43,8 +43,8 @@ class Login extends LIBRARY {
             useragent: this.req.headers['user-agent']
         };
 
-        const data = await this.db.insert_with_unique_id('sessions', session, this.random_id, 30, 'id');
-        this.render({login: true}, 200, {'Set-Cookie':'session='+data[1].id+'; path=/'}); 
+        const data = await this.db.insert_with_unique_id('sessions', session, this.random_id, 40, 'id');
+        this.render({login: true}, 200, {'Set-Cookie':'session=' + data[1].id + '; path=/'}); 
     }
 }
 

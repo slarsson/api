@@ -3,16 +3,17 @@
 const http = require('http');
 const qs = require('querystring');
 const parse_url = require('url');
+const Library = require('./lib.js');
 
 const server = http.createServer((req, res) => {
     const input = url(req.url);
     if(input.url != null){
-        redirect(res, input.url);
+        new Library(req, res).render({}, 301, {Location: input.url});
         return;
     }
 
     try {
-        let target = {};
+        let target;
         if(input.path.length != 0){
             target = require('./src/'+input.path[0]+'.js');
         }else {
@@ -23,29 +24,14 @@ const server = http.createServer((req, res) => {
         if(input.path.length > 1){
             if(input.path.length == 2 && typeof obj['_'+input.path[1]] === 'function'){
                 obj['_'+input.path[1]].call(obj);
-            }else {
-                throw "404 -> method not found";
-            }
+            }else {throw "404, method missing";}
         }else {
             obj.index(); 
         }
     }catch(e){
-        console.log(e);
-        error(res, {status: false});
-        return;
+        new Library(req, res).render({status: false}, 404);
     }
 });
-
-// cors error!?
-const error = (res, json) => {
-    res.writeHead(404, {"Content-Type": "application/json"});
-    res.end(JSON.stringify(json, null, 0));    
-};
-
-const redirect = (res, new_url) => {
-    res.writeHead(301, {'Location': new_url});
-    res.end();
-};
 
 const url = (request_url) => {
     const input = parse_url.parse(request_url, true);
