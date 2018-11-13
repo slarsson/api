@@ -85,3 +85,9 @@ PATCH:
 * null eller "null" för input?
 * request limit?
 * findandmodify?
+
+
+## LÄGGA TILL:
+* ranking, poäng -> vinster -> målskillnad
+* skapa bracket då alla grupper är stängda
+* match om tredjepris

@@ -62,6 +62,7 @@ class Game extends Library {
         this.render(data);
     }
 
+    /*
     // TEST:
     async _create(){
         const t = await this.db.find('tournaments', {id: this.query.t});
@@ -81,6 +82,23 @@ class Game extends Library {
 
         this.render(await this.db.edit('tournaments', {id: t.id}, {bracket: bracket}));
     }
+
+    async _rank(){
+        const t = await this.db.find('tournaments', {id: this.query.t});
+        if(t == null){
+            this.render(null); return;
+        }
+        const asdf = require('../tournament/rank.js');
+        const data = new asdf(t);
+
+        //const x = data.group(0);
+        const x = data.all([1]);
+
+        //console.log(data.sum(2, 0));
+
+        this.render(x);
+    }
+    */
 }
 
 module.exports = Game;

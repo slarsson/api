@@ -1,14 +1,11 @@
 'use strict';
 
-const Rank = require('./rank.js');
-
 class Progress {
     constructor(tournament){
         this.tournament = tournament;
         this.r4 = [[1, 0], [null, null], [1, 1]];
         this.r8 = [[2, 0], [2, 1], [3, 0], [null, null], [3, 1], [4, 0], [4, 1]];
         this.r16 = [[4, 0], [4, 1], [5, 0], [5, 1], [6, 0], [6, 1], [7, 0], [null, null], [7, 1], [8, 0], [8, 1], [9, 0], [9, 1], [10, 0], [10, 1]];
-        this.rank = new Rank(tournament);
     }
 
     // kollar om gruppen är 'färdig' och vilka som går vidare
@@ -28,7 +25,7 @@ class Progress {
 
     // genererar en lista på vilka som går vidare
     group_winners(id){
-        const list = this.rank.group(id);
+        const list = this.rank_group(id);
         const number_of_entries = this.tournament.bracket.length+1;
         const number_of_groups = this.tournament.groups.length;
         let n = Math.floor(number_of_entries/number_of_groups);
@@ -55,7 +52,7 @@ class Progress {
         if(missing == 0){return group_winners_list;}
     
         const del = group_winners_list.map((item) => {return item.team;});
-        const rest = this.rank.all(del);
+        const rest = this.rank_all(del);
         
         let n = -1;
         for(let i = 0; i < missing; i++){
@@ -69,15 +66,61 @@ class Progress {
         return group_winners_list;
     }
 
+    // rankar en grupp efter poäng, högst till lägst
+    rank_group(id){
+        let teams = this.tournament.groups[id].teams.slice();
+        let points = this.tournament.groups[id].points.slice();
+        
+        this.sort(teams, points);
+        return teams;
+    }
+
+    // rankar alla spelare efter poäng, högst till lägst
+    // remove: array med 'teams' som inte ska ingå
+    rank_all(remove){
+        let all_teams = [];
+        let all_points = [];
+
+        for(const item of this.tournament.groups){
+            for(let i = 0; i < item.teams.length; i++){
+                if(remove.includes(item.teams[i])){continue;}
+                all_teams.push(item.teams[i]);
+                all_points.push(item.points[i]);
+            }
+        }
+
+        this.sort(all_teams, all_points);
+        return all_teams;
+    }
+
+    // sorterar 'teams' efter 'points', har de samma poäng lottas ordningen
+    // borde lägga till 'if' då grupperna är olika stora
+    sort(teams, points){
+        for(let i = 0; i < teams.length-1; i++){
+            for(let j = i+1; j < teams.length; j++){
+                if(points[j] > points[i]){
+                    [points[i], points[j]] = [points[j], points[i]];
+                    [teams[i], teams[j]] = [teams[j], teams[i]]; 
+                }
+                if(points[j] == points[i]){
+                    if(Math.floor(Math.random()*2) == 0){
+                        [points[i], points[j]] = [points[j], points[i]];
+                        [teams[i], teams[j]] = [teams[j], teams[i]]; 
+                    }
+                }
+            }
+        }
+    }
+
     // skapar en fullständig lista, om alla grupper är 'färdiga' 
-    get_bracket(id){
+    get_bracket(){
         let out = [];
         let i = 0;
 
         for(const item of this.tournament.groups){
-            if(i != id && item.completed == false){
+            if(item.completed == false){
                 console.log("alla grupper ej klara!");
-                return false;
+                //return false;
             }
             out = out.concat(this.group_winners(i));
             i++;

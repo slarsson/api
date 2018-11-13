@@ -3,7 +3,7 @@
 const mongodb = require('mongodb');//3.1.6. .MongoClient;?
 const url = 'mongodb://localhost:27017/';
 const options = {useNewUrlParser:true};
-const name = 'vod';
+const name = 'db_my_db';
 
 class Database {
     find(collection, query, projection){

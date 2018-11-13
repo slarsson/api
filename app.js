@@ -15,6 +15,7 @@ const server = http.createServer((req, res) => {
     try {
         let target;
         if(input.path.length != 0){
+            console.log(input.path[0]);
             target = require('./src/'+input.path[0]+'.js');
         }else {
             target = require('./src/index.js');
