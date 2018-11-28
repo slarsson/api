@@ -3,7 +3,8 @@
 const mongodb = require('mongodb');//3.1.6. .MongoClient;?
 const url = 'mongodb://localhost:27017/';
 const options = {useNewUrlParser:true};
-const name = 'db_my_db';
+const name = 'vod';
+//const name = 'db_my_db';
 
 class Database {
     find(collection, query, projection){
@@ -64,7 +65,10 @@ class Database {
                 dbo.collection(collection).insertOne(data, (err, res) => {
                     db.close();
                     if(this.error(err)){resolve(null); return;}
-                    resolve([this.parse_results(res.result), {[key]: id}]);
+                    
+                    let output = this.parse_results(res.result);
+                    output[key] = id;
+                    resolve(output);
                 });
             });
         });

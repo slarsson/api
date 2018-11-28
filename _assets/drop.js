@@ -1,3 +1,5 @@
+// töm en collection
+
 'use strict';
   
 const name = 'tournaments';

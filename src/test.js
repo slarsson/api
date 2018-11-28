@@ -1,3 +1,5 @@
+// ta bort denna fil!!
+
 'use strict';
 
 const Library = require('../lib.js');
@@ -9,7 +11,11 @@ class Test extends Library {
     }
 
     index(){
-        this.render(null);
+        this.render({
+            users: "/list",
+            sessions: "/sessions",
+            tournaments: "/t",
+        });
     }
 
     async _list(){
@@ -22,13 +28,6 @@ class Test extends Library {
 
     async _t(){
         this.render(await this.db.find_all('tournaments', this.query));
-    }
-
-    async _add(){
-        let json = await this.get_template("./_assets/t.json");
-        json.id = this.random_id();
-        this.render(json);
-        //this.db.insert('tournaments', json);
     }
 }
 

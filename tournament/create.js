@@ -4,7 +4,6 @@ class Create {
     constructor(creator, data, teams){
         this.creator = creator;
         this.data = data;
-        //this.teams = ["Arsenal", "Boden BK", "IFK Norrköping", "Manchester United", "FC Barcelona", "KHK", "AIK", "Chelsea", "Brommapojkarna", "Luleå Hockey"];
         this.teams = teams;
     }
 
@@ -61,11 +60,13 @@ class Create {
             }
 
             let points = [];
+            let stats = [];
             for(let j = 0; j < group.length; j++){
                 points.push(0);
+                stats.push([0, 0, 0, 0, 0, 0]);
             }
 
-            output.push({teams: group, points: points, completed: false});
+            output.push({teams: group, points: points, stats: stats, completed: false});
         }
         return output;
     }

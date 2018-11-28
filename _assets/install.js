@@ -1,3 +1,7 @@
+// lägger till första användaren
+// username: admin
+// password: 123
+
 'use strict';
 
 const admin = {
@@ -9,7 +13,6 @@ const admin = {
     
 const db = require('../db.js');
 
-/*new db().insert('users', admin).then((res) => {
+new db().insert('users', admin).then((res) => {
     console.log(res);
 });
-*/

@@ -44,7 +44,7 @@ class Login extends Library {
         };
 
         const data = await this.db.insert_with_unique_id('sessions', session, this.random_id, 40, 'id');
-        this.render({login: true}, 200, {'Set-Cookie':'session=' + data[1].id + '; path=/'}); 
+        this.render({login: true}, 200, {'Set-Cookie':'session=' + data.id + '; path=/'}); 
     }
 }
 
