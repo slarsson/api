@@ -6,7 +6,16 @@ const parse_url = require('url');
 const Library = require('./lib.js');
 
 const server = http.createServer((req, res) => {
+    console.log(req.headers.origin);
+
+    
     const input = url(req.url);
+    
+    if(req.method == 'OPTIONS'){
+        new Library(req, res).render({});
+        return;
+    }
+    
     if(input.url != null){
         new Library(req, res).render({}, 301, {Location: input.url});
         return;

@@ -15,13 +15,49 @@ class Results {
         const pos2 = this.tournament.groups[this.group].teams.indexOf(this.tournament.games[this.game_id].teams[1]);
  
         let p1_old = 0, p2_old = 0;
+        let m1_old = 0, m2_old = 0;
+        let gm1_old = 0, gm2_old = 0;
+        let im1_old = 0, im2_old = 0;
         if(this.tournament.games[this.game_id].results[0] != null && this.tournament.games[this.game_id].results[1] != null){
             ({p1: p1_old, p2: p2_old} = this.points(this.tournament.games[this.game_id].results[0], this.tournament.games[this.game_id].results[1]));
+            
+            m1_old = 1;
+            m2_old = 1;
+
+            gm1_old = this.tournament.games[this.game_id].results[0];
+            gm2_old = this.tournament.games[this.game_id].results[1];
+
+            im1_old = this.tournament.games[this.game_id].results[1];
+            im2_old = this.tournament.games[this.game_id].results[0];
+
+            // ta bort gammla poäng..
         }
 
         let {p1, p2} = this.points(r1, r2);
         p1 += (this.tournament.groups[this.group].points[pos1] - p1_old);
         p2 += (this.tournament.groups[this.group].points[pos2] - p2_old);
+
+        // fixa stats
+        // groups.stats[index][x]
+        // 0 = antal spelade matcher
+        // 1 = vunna
+        // 2 = oavgjorda
+        // 3 = antal mål
+        // 4 = insläppta mål
+        // 5 = mål skillnad
+
+        // spelade
+        let m1 = this.tournament.groups[this.group].stats[pos1][0] + 1 - m1_old;
+        let m2 = this.tournament.groups[this.group].stats[pos2][0] + 1 - m2_old;
+
+        // antal mål
+        let gm1 = this.tournament.groups[this.group].stats[pos1][3] + r1 - gm1_old;
+        let gm2 = this.tournament.groups[this.group].stats[pos2][3] + r2 - gm2_old;
+
+        // insläppta
+        let im1 = this.tournament.groups[this.group].stats[pos1][4] + r2 - im1_old;
+        let im2 = this.tournament.groups[this.group].stats[pos2][4] + r1 - im2_old;
+
 
         return {
             ['games.' + this.game_id + '.results.0']: r1,
@@ -29,7 +65,19 @@ class Results {
             ['groups.' + this.group + '.points.' + pos1]: p1,
             ['groups.' + this.group + '.points.' + pos2]: p2,
             ['games.' + this.game_id + '.status']: true,
-            ['games.' + this.game_id + '.edit']: new Date().getTime()
+            ['games.' + this.game_id + '.edit']: new Date().getTime(),
+
+            ['groups.' + this.group + '.stats.' + pos1 + '.0']: m1,
+            ['groups.' + this.group + '.stats.' + pos2 + '.0']: m2,
+
+            ['groups.' + this.group + '.stats.' + pos1 + '.3']: gm1,
+            ['groups.' + this.group + '.stats.' + pos2 + '.3']: gm2,
+
+            ['groups.' + this.group + '.stats.' + pos1 + '.4']: im1,
+            ['groups.' + this.group + '.stats.' + pos2 + '.4']: im2,
+
+            ['groups.' + this.group + '.stats.' + pos1 + '.5']: (gm1 - im1),
+            ['groups.' + this.group + '.stats.' + pos2 + '.5']: (gm2 - im2)
         };
     }
 

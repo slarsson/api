@@ -183,7 +183,17 @@ class Library {
     render(json, http_status_code, option){
         if(http_status_code == null){http_status_code = 200;}
         this.res.setHeader('Content-Type', 'application/json');
-        this.res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+        
+        // TILLFÄLLIG:
+        console.log("req origin: " + this.req.headers.origin + ", ip: " + this.req.connection.remoteAddress);
+        
+        if(this.req.headers.origin != null){
+            this.res.setHeader('Access-Control-Allow-Origin', this.req.headers.origin);
+        }else {
+            this.res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+        }
+        //this.res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+        
         this.res.setHeader('Access-Control-Allow-Credentials','true');
         this.res.setHeader('Access-Control-Allow-Headers','Origin, Content-type, Accept');
         this.res.setHeader('Access-Control-Allow-Methods','GET, POST, PATCH, PUT, DELETE, HEAD, OPTIONS');

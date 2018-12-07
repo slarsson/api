@@ -52,11 +52,16 @@ class Create {
         let counter = 0;
         for(let i = 0; i < number_of_groups; i++){
             let group = [];
-            for(let j = 0; j < teams_per_group; j++){
+            let rank = [];
+
+            let j = 0;
+            for(; j < teams_per_group; j++){
                 group.push(teams[counter]); counter++;
+                rank.push(j);
             }
             if(i < overflow){
                 group.push(teams[counter]); counter++;
+                rank.push(j + 1);
             }
 
             let points = [];
@@ -66,7 +71,7 @@ class Create {
                 stats.push([0, 0, 0, 0, 0, 0]);
             }
 
-            output.push({teams: group, points: points, stats: stats, completed: false});
+            output.push({teams: group, points: points, stats: stats, rank: rank, completed: false});
         }
         return output;
     }
