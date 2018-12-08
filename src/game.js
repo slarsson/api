@@ -50,6 +50,9 @@ class Game extends Library {
             }
             if(res.group_completed()){update = true;}else {update = false;}
             changes = res.add(this.query.r1, this.query.r2);
+
+
+            //rank changes..
         }
 
         if(!changes){
