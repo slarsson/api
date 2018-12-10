@@ -61,12 +61,12 @@ class Create {
             }
             if(i < overflow){
                 group.push(teams[counter]); counter++;
-                rank.push(j + 1);
+                rank.push(j);
             }
 
             let points = [];
             let stats = [];
-            for(let j = 0; j < group.length; j++){
+            for(let k = 0; k < group.length; k++){
                 points.push(0);
                 stats.push([0, 0, 0, 0, 0, 0]);
             }
