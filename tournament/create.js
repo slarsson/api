@@ -1,5 +1,7 @@
 'use strict';
 
+const _test = require('./test.js');
+
 class Create {
     constructor(creator, data, teams){
         this.creator = creator;
@@ -27,6 +29,7 @@ class Create {
             groups: groups,
             games: this.games(this.data.rounds, groups),
             bracket: bracket,
+            test: _test.create(groups.length, this.teams.length, 2)
         }, status: true, error: null};
     }
 
