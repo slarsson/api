@@ -9,12 +9,12 @@ class Bracket {
             _size = 8;
         }
 
-        let x = this.get_groups_size(n_teams, n_groups);
-        let y = this.get_qualify_size(n_groups, x.n_per_group, _size);
-        
         // test:
         if(n_teams < 16){_size = 8;}
         if(n_teams < 8){_size = 4;}
+        
+        let x = this.get_groups_size(n_teams, n_groups);
+        let y = this.get_qualify_size(n_groups, x.n_per_group, _size);
 
         // // ääääh.. vafan asså... 
         // if(n_teams < 8 && (_size == 8 || _size == 16)){return false;}
