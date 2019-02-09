@@ -1,6 +1,6 @@
 'use strict';
 
-const _test = require('./test.js');
+const _test = require('./bracket.js');
 
 class Create {
     constructor(creator, data, teams){
@@ -15,10 +15,17 @@ class Create {
             return {data: null, status: false, error: "atleast two teams per group"};
         }
 
-        const bracket = this.bracket(this.data.type, groups.length);
+        const test = _test.create(groups.length, this.teams.length, this.data.type);
+        if(!test){
+            return {data: null, status: false, error: "meh.. can't create that :("};
+        }
+
+        const bracket = this.bracket(this.data.type, groups.length, test);
         if(!bracket){
             return {data: null, status: false, error: "bad input, to many groups or type does not exist"};
         }
+
+        
 
         return {data: {
             name: this.data.name,
@@ -29,7 +36,7 @@ class Create {
             groups: groups,
             games: this.games(this.data.rounds, groups),
             bracket: bracket,
-            test: _test.create(groups.length, this.teams.length, 2)
+            position: test,
         }, status: true, error: null};
     }
 
@@ -106,20 +113,47 @@ class Create {
         return output;
     }
 
-    bracket(type, number_of_groups){
+    bracket(type, number_of_groups, positions){
         const size = [3, 7, 15];
+        const pos = [1, 2, 4];
         let output = [];
+        let p = 0;
 
         if(type < 0 || type > size.length || number_of_groups > (size[type]+1)){return false;}
         for(let i = 0; i < size[type]; i++){
-            output.push({
-                teams: [null, null], 
-                results: [null, null], 
-                status: false,
-                placeholder: ['tbd', 'tbd'], 
-                edit: null
-            });
+            let teams = [null, null];
+            let placeholder =  ['tbd', 'tbd'];
+            
+            if(i < pos[type] || i >= (size[type] - pos[type])){
+                if(positions[p][0] == -1){
+                    teams[0] = false;
+                    placeholder[0] = 'n/a';
+                }
+                if(positions[p + 1][0] == -1){
+                    teams[1] = false;
+                    placeholder[1] = 'n/a';
+                }
+                
+                output.push({
+                    teams: teams, 
+                    results: [null, null], 
+                    status: false,
+                    placeholder: placeholder,
+                    edit: null
+                });
+
+                p += 2;
+            }else {
+                output.push({
+                    teams: teams, 
+                    results: [null, null], 
+                    status: false,
+                    placeholder: placeholder, 
+                    edit: null
+                });
+            }   
         }
+
         return output;
     }
 }

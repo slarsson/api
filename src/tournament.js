@@ -50,6 +50,11 @@ class Tournament extends Library {
             this.render({status: false, error: error}); return;
         }
 
+        //test:
+        const xx = new Progress(data);
+        xx.empty(data.bracket, 16);
+        // endtest..
+
         this.render(await this.db.insert_with_unique_id('tournaments', data, this.random_id, null, 'id'));
     }
 
