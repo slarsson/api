@@ -69,8 +69,16 @@ class Game extends Library {
         // kanske inte ska göra flera db-requestz..
         if(update){
             const t2 = await this.db.find('tournaments', {id: this.query.t});
-            let bracket = new Progress(t2).add_group_winners_to_bracket(t.games[this.query.g].group);
+            
+            let obj = new Progress(t2);
+            let bracket = obj.add_group_winners_to_bracket(t.games[this.query.g].group);
             await this.db.edit('tournaments', {id: this.query.t}, bracket);
+            
+            if(obj.groups_completed(t.games[this.query.g].group)){
+                obj.best_of_the_rest();
+            }
+            //console.log(obj.groups_completed(t.games[this.query.g].group));
+        
         }
 
         this.render(data);

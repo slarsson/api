@@ -277,17 +277,30 @@ class Progress {
     }
 
     // returnerar ändringar + lägger till ändringar i objektet
+    // tomma matcher -> lägger till nästa 
     add_group_winners_to_bracket(id){
-
-        // FIXA STORLEKEN!!!!!!!!!!!!!!
-        const r = [
+        const r4 = [
+            [0, 0], [0, 1], [1, 0], [1, 1]
+        ];
+        
+        const r8 = [
+            [0, 0], [0, 1], [1, 0], [1, 1],
+            [5, 0], [5, 1], [6, 0], [6, 1]
+        ];
+        
+        const r16 = [
             [0, 0], [0, 1], [1, 0], [1, 1],
             [2, 0], [2, 1], [3, 0], [3, 1],
             [11, 0], [11, 1], [12, 0], [12, 1],
             [13, 0], [13, 1], [14, 0], [14, 1]
         ];
 
+        let r_size, r;
         let n = this.tournament.bracket.length + 1;
+        if(n == 4){r_size = this.r4; r = r4;} else
+        if(n == 8){r_size = this.r8; r = r8;} else
+        if(n == 16){r_size = this.r16; r = r16;}
+
         if(this.tournament.teams.length < 16){n = 8;}
         if(this.tournament.teams.length < 8){n = 4;}
 
@@ -303,14 +316,46 @@ class Progress {
                     this.tournament.bracket[r[j][0]].placeholder[r[j][1]] = null;
                     updates['bracket.' + r[j][0] + '.teams.' + r[j][1]] = this.tournament.groups[id].teams[this.tournament.groups[id].rank[i]];
                     updates['bracket.' + r[j][0] + '.placeholder.' + r[j][1]] = null;
+
+                    let prev = r[j][0];
+                    let index = r[j][1];
+
+                    while(prev != null){
+                        let second_index = 0;
+                        if(index == 0){second_index = 1;}
+                        if(this.tournament.bracket[prev].teams[second_index] === false){
+                            this.tournament.bracket[r_size[prev][0]].teams[r_size[prev][1]] = this.tournament.groups[id].teams[this.tournament.groups[id].rank[i]];
+                            this.tournament.bracket[r_size[prev][0]].placeholder[r_size[prev][1]] = null;
+                            updates['bracket.' + r_size[prev][0] + '.teams.' + r_size[prev][1]] = this.tournament.groups[id].teams[this.tournament.groups[id].rank[i]];
+                            updates['bracket.' + r_size[prev][0] + '.placeholder.' + r_size[prev][1]] = null;
+                        
+                            index = r_size[prev][1];
+                            prev = r_size[prev][0];
+                            
+                            continue;
+                        }
+                        break;
+                    }
                     break;
                 }
             }
         }
-
-        console.log(updates);
         return updates;
     }
+
+    groups_completed(current = -1){
+        for(let i = 0; i < this.tournament.games.length; i++){
+            if(this.tournament.games[i].status == false && this.tournament.games[i].group != current){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    best_of_the_rest(){
+        console.log("lägg till resten...");
+    }
+
 }
 
 module.exports = Progress;
