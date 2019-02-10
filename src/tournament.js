@@ -97,26 +97,6 @@ class Tournament extends Library {
 
         let changes = {owners: owners};
 
-        if(this.query.group != null){
-            if(target.groups[this.query.group] == null){
-                this.render({status: false, error: "group not found"}); return;
-            }
-
-            if(target.groups[this.query.group].completed !== true){
-                const p = new Progress(target);
-                if(p.complete(this.query.group, true)){
-                    changes['groups.' + this.query.group + '.completed'] = true;
-                    
-                    const list = p.get_bracket(this.query.group);
-                    if(list !== false){
-                        changes.bracket = p.populate_bracket(list);
-                    }
-                }else {
-                    this.render({status: false, error: "group not completed"}); return;
-                }
-            }
-        }
-
         const allowed = ["name", "text"];  
         for(const item of allowed){
             if(this.query[item] != null){

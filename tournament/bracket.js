@@ -33,6 +33,7 @@ class Bracket {
             }
         }
 
+        if(_size == 16){return z;}
         return this.padding(z, _size, 16);
     }
 
@@ -200,25 +201,25 @@ class Bracket {
         return y.left.concat(y.right);
     }
 
-    // test my test
-    // fungerar mest troligt inte.....
-    static remove(list, n_items, n_groups){
-        for(let i = 0; i < n_items; i++){
-            let max = -1;
-            let index;
-            for(let j = 0; j < list.length; j++){
-                if(list[j][0] > max){
-                    max = list[j][0];
-                    index = list[j];
-                }
-            }
+    // // test my test
+    // // fungerar mest troligt inte.....
+    // static remove(list, n_items, n_groups){
+    //     for(let i = 0; i < n_items; i++){
+    //         let max = -1;
+    //         let index;
+    //         for(let j = 0; j < list.length; j++){
+    //             if(list[j][0] > max){
+    //                 max = list[j][0];
+    //                 index = list[j];
+    //             }
+    //         }
 
-            index[0] = -1;
-            index[1] = -1;
-        }
+    //         index[0] = -1;
+    //         index[1] = -1;
+    //     }
 
-        return list;
-    }
+    //     return list;
+    // }
 
     static padding(list, _size, _real_size){
         let newlist = new Array(_real_size).fill([-1, -1]);
@@ -251,9 +252,6 @@ class Bracket {
         return newlist;
     }
 
-    static empty(bracket){
-        return bracket;
-    }
 }
 
 module.exports = Bracket;

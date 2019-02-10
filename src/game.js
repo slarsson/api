@@ -48,11 +48,14 @@ class Game extends Library {
             if(!res.status()){
                 this.render({status: false, error: "game cant be updated.."}); return;
             }
-            if(res.group_completed()){update = true;}else {update = false;}
+
+            if(res.group_completed()){
+                update = true;
+            }else {
+                update = false;
+            }
+
             changes = res.add(this.query.r1, this.query.r2);
-
-
-            //rank changes..
         }
 
         if(!changes){
@@ -62,6 +65,14 @@ class Game extends Library {
         let data = await this.db.edit('tournaments', {id: this.query.t}, changes);
         data.update = update;
         
+        // annan fil kanske?
+        // kanske inte ska göra flera db-requestz..
+        if(update){
+            const t2 = await this.db.find('tournaments', {id: this.query.t});
+            let bracket = new Progress(t2).add_group_winners_to_bracket(t.games[this.query.g].group);
+            await this.db.edit('tournaments', {id: this.query.t}, bracket);
+        }
+
         this.render(data);
     }
 
