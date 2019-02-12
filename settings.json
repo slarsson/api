@@ -1,0 +1,8 @@
+{
+    "test": "hejhej..",
+    "salt": "nm/&(xx2d329738d2b36#",
+    "database": {
+        "url": "mongodb://127.0.0.1:27017/",
+        "name": "vod"
+    }
+}

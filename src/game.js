@@ -75,7 +75,8 @@ class Game extends Library {
             await this.db.edit('tournaments', {id: this.query.t}, bracket);
             
             if(obj.groups_completed(t.games[this.query.g].group)){
-                obj.best_of_the_rest();
+                const asdf = obj.best_of_the_rest();
+                await this.db.edit('tournaments', {id: this.query.t}, asdf);
             }
             //console.log(obj.groups_completed(t.games[this.query.g].group));
         

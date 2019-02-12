@@ -115,7 +115,7 @@ class Bracket {
             [y.right[3], y.right[7]] = [y.right[7], y.right[3]];
         }
    
-        // lägger till grupp nummer till matcherna
+        // lägger till gruppnummer till matcherna
         target = y.left;
         _next = y.right;
         for(let j = 0; j < n_qualify_group; j++){

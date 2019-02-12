@@ -30,7 +30,7 @@ class Rank {
         let points = [];
 
         for(const item of this.groups){
-            console.log(item);
+            //console.log(item);
             for(let i = 0; i < item.teams.length; i++){
                 if(excludes.includes(item.teams[i])){continue;}
                 teams.push(item.teams[i]);
