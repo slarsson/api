@@ -1,7 +1,7 @@
 # api-tournament
 Backend API for React app:
 
-![ex 1](https://i.imgur.com/kf6DR3W.png)
+![ex 1](https://i.imgur.com/cZM96og.png)
 ![ex 1](https://i.imgur.com/Ivc2kJD.png)
 
 
