@@ -1,3 +1,11 @@
+# api-tournament
+Backend API for React app:
+
+![ex 1](https://i.imgur.com/kf6DR3W.png)
+![ex 1](https://i.imgur.com/Ivc2kJD.png)
+
+
+INFO:
 # GROUPS:
 * 0: kan ändra på allt
 * 1: 'admin' kan ändra på '2' och alla turneringar
@@ -51,7 +59,6 @@ PATCH:
 * name: byt namn
 * text: ändra text
 * 0,1,2, osv: ange array index för att ändra lagnamn, ex: '?2=aik&4=hammarby'
-* group: ange vilket grupp att 'stänga', 0,1,2, osv..
 
 DELETE:
 * t: id, vilket turnering att ta bort
@@ -62,32 +69,5 @@ PATCH:
 * g: match index i listan
 * r1: resultat för index 0
 * r2: resultat för index 1
-* bracket: true = ändra match i bracket, utelämmnas ändras matcher i gruppen 'games'
-(./game/create/ = skapar bracket (då alla grupper är 'klara'), tillfällig!)
+* bracket: true = ändra match i bracket, utelämmnas ändras matcher i gruppen
 
-
-
-
-
-
-
-
-
-# ÖVRIGT
-
-## GROUPS:
-0: root : kan ändra på 'admin'
-1: admin : kan ändra på 'users' + lägga till nya användare
-2: users : ''
-
-## OKLART (?)
-* ta bort '_id' från find och find_all?
-* null eller "null" för input?
-* request limit?
-* findandmodify?
-
-
-## LÄGGA TILL:
-* ranking, poäng -> vinster -> målskillnad
-* skapa bracket då alla grupper är stängda
-* match om tredjepris
